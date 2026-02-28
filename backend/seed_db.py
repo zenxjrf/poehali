@@ -15,11 +15,11 @@ DRIVERS_DATA = []
 TRIPS_DATA = [
     {
         "direction": "tashkent_fergana",
-        "price": 15000
+        "price": 150000
     },
     {
         "direction": "fergana_tashkent",
-        "price": 15000
+        "price": 150000
     }
 ]
 

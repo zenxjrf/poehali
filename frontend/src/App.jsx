@@ -215,8 +215,8 @@ function App() {
     fergana_tashkent: safeGet(t, 'directions.fergana_tashkent', 'Фергана → Ташкент')
   }
 
-  // Цена: 15000 с человека + почта от 60000
-  const basePrice = 15000
+  // Цена: 150000 с человека + почта от 60000
+  const basePrice = 150000
   const mailPrice = 60000
 
   // Preloader
