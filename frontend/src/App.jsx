@@ -12,32 +12,20 @@ const translations = { ru, uz }
 // Fallback для отсутствующих ключей
 const defaultTranslations = {
   app_title: 'Poehali',
-  app_subtitle: 'Поездки с комфортом',
+  app_subtitle: 'Ташкент ↔ Фергана',
+  app_description: 'Быстро. Комфортно. Надёжно.',
   directions: {
     tashkent_fergana: 'Ташкент → Фергана',
     fergana_tashkent: 'Фергана → Ташкент'
   },
   buttons: {
-    view_drivers: '👨‍✈️ Посмотреть водителей',
-    leave_request: '📞 Оставить заявку',
+    leave_request: 'Оставить заявку',
     back: '← Назад',
-    call: '📞 Позвонить',
-    message: '💬 Написать',
-    send_request: '📞 Отправить заявку',
+    call: 'Позвонить',
+    message: 'Написать',
+    send_request: 'Отправить заявку',
     sending: 'Отправка...',
     return_to_menu: 'Вернуться в меню'
-  },
-  drivers: {
-    title: 'Наши водители',
-    experience: 'Стаж',
-    years: 'лет',
-    car: 'Автомобиль',
-    year: 'г.в.',
-    amenities: {
-      air_conditioning: '❄️ Кондиционер',
-      large_trunk: '🧳 Большой багажник',
-      pets_allowed: '🐾 Можно с животными'
-    }
   },
   order: {
     title: 'Заявка на поездку',
@@ -49,14 +37,20 @@ const defaultTranslations = {
     phone_placeholder: '+998 90 123 45 67',
     call_time: 'Удобное время для звонка',
     call_time_placeholder: 'Например: с 9:00 до 18:00',
-    passengers: 'Количество пассажиров',
-    comment: 'Комментарий (необязательно)',
+    passengers: 'Пассажиры',
+    comment: 'Комментарий',
     comment_placeholder: 'Пожелания к поездке'
   },
   success: {
     title: 'Заявка отправлена!',
     message: 'Мы перезвоним вам в течение 5 минут.',
     icon: '✅'
+  },
+  home: {
+    price_label: 'Стоимость поездки',
+    per_person: 'с человека',
+    mail_label: 'Посылки',
+    mail_from: 'от'
   }
 }
 
@@ -75,7 +69,6 @@ function App() {
   const [trip, setTrip] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [submitStatus, setSubmitStatus] = useState(null)
-  const [apiError, setApiError] = useState(null)
   const [language, setLanguage] = useState(() => {
     try {
       return localStorage.getItem('poehali_language') || 'ru'
@@ -127,7 +120,7 @@ function App() {
     // Имитация загрузки для preloader
     setTimeout(() => {
       setIsLoading(false)
-    }, 1000)
+    }, 800)
   }, [])
 
   useEffect(() => {
@@ -146,8 +139,7 @@ function App() {
       setTrip(data)
     } catch (error) {
       console.error('Ошибка загрузки поездки:', error)
-      // Устанавливаем цену по умолчанию
-      setTrip({ id: 1, direction, price: 15000 })
+      setTrip({ id: 1, direction, price: 150000 })
     }
   }
 
@@ -182,8 +174,6 @@ function App() {
           }
         }
       } else {
-        const errorData = await response.json().catch(() => ({}))
-        console.error('Ошибка сервера:', errorData)
         setSubmitStatus('error')
       }
     } catch (error) {
@@ -206,7 +196,7 @@ function App() {
     try {
       localStorage.setItem('poehali_language', newLang)
     } catch (error) {
-      console.warn('Не удалось сохранить язык в localStorage:', error)
+      console.warn('Не удалось сохранить язык:', error)
     }
   }
 
@@ -215,17 +205,19 @@ function App() {
     fergana_tashkent: safeGet(t, 'directions.fergana_tashkent', 'Фергана → Ташкент')
   }
 
-  // Цена: 150000 с человека + почта от 60000
   const basePrice = 150000
   const mailPrice = 60000
 
   // Preloader
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-3 border-[#4a4a4a] border-t-[#6b6b6b] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#8a8a8a] text-sm font-medium">Poehali</p>
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 border-2 border-[#3a3a3a] rounded-full"></div>
+            <div className="absolute inset-0 border-2 border-t-[#6366f1] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-[#8a8a8a] text-sm font-medium tracking-wider">POEHALI</p>
         </div>
       </div>
     )
@@ -234,90 +226,104 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] text-[#e0e0e0] p-4 flex flex-col">
-        {/* Версия */}
-        <div className="absolute top-4 left-4">
-          <span className="text-xs text-[#5a5a5a] font-mono">VER 1.1 [Beta]</span>
+      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] text-[#e0e0e0] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4">
+          <span className="text-xs text-[#5a5a5a] font-mono tracking-wider">VER 1.2</span>
+          <button
+            onClick={toggleLanguage}
+            className="bg-[#1f1f1f] hover:bg-[#2a2a2a] px-3 py-1.5 rounded-full text-xs font-semibold transition-all text-[#6b6b6b] border border-[#2a2a2a]"
+          >
+            {language === 'ru' ? 'UZ' : 'RU'}
+          </button>
         </div>
 
-        {/* Переключатель языка */}
-        <button
-          onClick={toggleLanguage}
-          className="absolute top-4 right-4 bg-[#2a2a2a] hover:bg-[#3a3a3a] px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[#8a8a8a]"
-        >
-          {language === 'ru' ? 'UZ' : 'RU'}
-        </button>
-
-        <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center">
-          {/* Заголовок */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-[#e0e0e0] mb-1">Poehali</h1>
-            <p className="text-[#6b6b6b] text-sm">Ташкент ↔ Фергана</p>
-          </div>
-
-          {/* Цена */}
-          <div className="bg-[#2a2a2a] rounded-2xl p-6 mb-6 border border-[#3a3a3a]">
-            <div className="text-center">
-              <p className="text-[#6b6b6b] text-xs mb-2 uppercase tracking-wide">Стоимость</p>
-              <div className="mb-4">
-                <p className="text-3xl font-bold text-[#e0e0e0]">{basePrice.toLocaleString()} сум</p>
-                <p className="text-[#6b6b6b] text-xs mt-1">с человека</p>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col justify-center px-4 pb-8">
+          <div className="max-w-md mx-auto w-full">
+            {/* Logo & Title */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-2xl mb-4 shadow-lg shadow-[#6366f1]/20">
+                <span className="text-3xl">🚕</span>
               </div>
-              <div className="border-t border-[#3a3a3a] pt-4">
-                <p className="text-[#8a8a8a] text-xs">Посылки от <span className="text-[#e0e0e0] font-semibold">{mailPrice.toLocaleString()} сум</span></p>
+              <h1 className="text-2xl font-bold text-[#e0e0e0] mb-1 tracking-tight">Poehali</h1>
+              <p className="text-[#6b6b6b] text-sm font-medium">{t.app_subtitle}</p>
+              <p className="text-[#4a4a4a] text-xs mt-2">{t.app_description}</p>
+            </div>
+
+            {/* Price Card */}
+            <div className="bg-gradient-to-br from-[#1f1f1f] to-[#2a2a2a] rounded-3xl p-6 mb-6 border border-[#2a2a2a] shadow-xl">
+              <div className="text-center">
+                <p className="text-[#6b6b6b] text-xs mb-3 uppercase tracking-widest">{t.home.price_label}</p>
+                <div className="mb-5">
+                  <p className="text-4xl font-bold bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] bg-clip-text text-transparent">
+                    {basePrice.toLocaleString()}
+                  </p>
+                  <p className="text-[#6b6b6b] text-xs mt-1.5">{t.home.per_person}</p>
+                </div>
+                <div className="bg-[#1a1a1a] rounded-xl py-3 px-4">
+                  <p className="text-[#8a8a8a] text-xs">
+                    {t.home.mail_label} <span className="text-[#e0e0e0] font-semibold">{t.home.mail_from} {mailPrice.toLocaleString()} сум</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Direction Buttons */}
+            <div className="space-y-2.5 mb-6">
+              <button
+                onClick={() => setDirection('tashkent_fergana')}
+                className={`w-full py-4 px-4 rounded-2xl font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                  direction === 'tashkent_fergana'
+                    ? 'bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-[#6366f1]/25'
+                    : 'bg-[#1f1f1f] text-[#8a8a8a] hover:bg-[#2a2a2a] border border-[#2a2a2a]'
+                }`}
+              >
+                <span>📍</span> {directionLabels.tashkent_fergana}
+              </button>
+
+              <button
+                onClick={() => setDirection('fergana_tashkent')}
+                className={`w-full py-4 px-4 rounded-2xl font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                  direction === 'fergana_tashkent'
+                    ? 'bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-[#6366f1]/25'
+                    : 'bg-[#1f1f1f] text-[#8a8a8a] hover:bg-[#2a2a2a] border border-[#2a2a2a]'
+                }`}
+              >
+                <span>📍</span> {directionLabels.fergana_tashkent}
+              </button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2.5">
+              <button
+                onClick={() => setCurrentView('order')}
+                className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-2xl font-medium hover:shadow-lg hover:shadow-[#6366f1]/30 transition-all text-sm"
+              >
+                📞 {t.buttons.leave_request}
+              </button>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={handleCall}
+                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a]"
+                >
+                  📞 {t.buttons.call}
+                </button>
+                <button
+                  onClick={handleMessage}
+                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a]"
+                >
+                  💬 {t.buttons.message}
+                </button>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Направление */}
-          <div className="space-y-3 mb-8">
-            <button
-              onClick={() => setDirection('tashkent_fergana')}
-              className={`w-full py-4 rounded-xl font-medium transition-all text-sm ${
-                direction === 'tashkent_fergana'
-                  ? 'bg-[#4a4a4a] text-[#e0e0e0]'
-                  : 'bg-[#2a2a2a] text-[#8a8a8a] hover:bg-[#3a3a3a]'
-              }`}
-            >
-              📍 {directionLabels.tashkent_fergana}
-            </button>
-
-            <button
-              onClick={() => setDirection('fergana_tashkent')}
-              className={`w-full py-4 rounded-xl font-medium transition-all text-sm ${
-                direction === 'fergana_tashkent'
-                  ? 'bg-[#4a4a4a] text-[#e0e0e0]'
-                  : 'bg-[#2a2a2a] text-[#8a8a8a] hover:bg-[#3a3a3a]'
-              }`}
-            >
-              📍 {directionLabels.fergana_tashkent}
-            </button>
-          </div>
-
-          {/* Кнопки */}
-          <div className="space-y-3 mt-auto">
-            <button
-              onClick={() => setCurrentView('order')}
-              className="w-full bg-[#4a4a4a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#5a5a5a] transition-all text-sm"
-            >
-              📞 Оставить заявку
-            </button>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleCall}
-                className="bg-[#2a2a2a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#3a3a3a] transition-all text-sm"
-              >
-                📞 Позвонить
-              </button>
-              <button
-                onClick={handleMessage}
-                className="bg-[#2a2a2a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#3a3a3a] transition-all text-sm"
-              >
-                💬 Написать
-              </button>
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="p-4 text-center">
+          <p className="text-[#3a3a3a] text-xs">© 2025 Poehali Taxi</p>
         </div>
       </div>
     )
@@ -326,120 +332,128 @@ function App() {
   // Экран формы заявки
   if (currentView === 'order') {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] text-[#e0e0e0] p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] text-[#e0e0e0] p-4">
         <div className="max-w-md mx-auto">
-          {/* Переключатель языка */}
+          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-[#6b6b6b] hover:text-[#8a8a8a]"
+              className="text-[#6b6b6b] hover:text-[#8a8a8a] transition-colors"
             >
               ← Назад
             </button>
-            <h1 className="text-base font-medium">Заявка на поездку</h1>
+            <h1 className="text-base font-medium text-[#e0e0e0]">{t.order.title}</h1>
             <button
               onClick={toggleLanguage}
-              className="bg-[#2a2a2a] px-3 py-1 rounded-lg text-xs font-semibold text-[#8a8a8a]"
+              className="bg-[#1f1f1f] px-3 py-1 rounded-full text-xs font-semibold text-[#6b6b6b] border border-[#2a2a2a]"
             >
               {language === 'ru' ? 'UZ' : 'RU'}
             </button>
           </div>
 
           {submitStatus === 'success' ? (
-            <div className="bg-[#2a2a2a] border border-[#3a3a3a] px-4 py-8 rounded-2xl text-center">
-              <p className="text-3xl mb-4">✅</p>
-              <h2 className="text-lg font-medium mb-2 text-[#e0e0e0]">Заявка отправлена!</h2>
-              <p className="text-[#6b6b6b] text-sm mb-4">Мы перезвоним вам в течение 5 минут.</p>
+            <div className="bg-[#1f1f1f] border border-[#2a2a2a] px-6 py-10 rounded-3xl text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#22c55e] to-[#16a34a] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#22c55e]/20">
+                <p className="text-3xl">✅</p>
+              </div>
+              <h2 className="text-lg font-semibold text-[#e0e0e0] mb-2">{t.success.title}</h2>
+              <p className="text-[#6b6b6b] text-sm mb-6">{t.success.message}</p>
               <button
                 onClick={() => {
                   setSubmitStatus(null)
                   setCurrentView('home')
                 }}
-                className="bg-[#4a4a4a] text-[#e0e0e0] px-6 py-2.5 rounded-xl text-sm font-medium"
+                className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white px-8 py-3 rounded-xl text-sm font-medium shadow-lg shadow-[#6366f1]/25"
               >
-                Вернуться в меню
+                {t.buttons.return_to_menu}
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-[#2a2a2a] rounded-2xl p-5 border border-[#3a3a3a] space-y-4">
-              <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">Направление</label>
-                <div className="bg-[#1a1a1a] p-3 rounded-xl text-[#e0e0e0] text-sm">
-                  {directionLabels[direction]}
-                </div>
+            <form onSubmit={handleSubmit} className="bg-[#1f1f1f] rounded-3xl p-5 border border-[#2a2a2a] space-y-4">
+              {/* Direction Info */}
+              <div className="bg-gradient-to-r from-[#6366f1]/10 to-[#8b5cf6]/10 rounded-xl p-4 mb-2">
+                <p className="text-[#6b6b6b] text-xs mb-1">{t.order.direction}</p>
+                <p className="text-[#e0e0e0] text-sm font-medium">{directionLabels[direction]}</p>
               </div>
 
+              {/* Name */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">Ваше имя</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.name}</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
-                  placeholder="Введите имя"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  placeholder={t.order.name_placeholder}
                   required
                 />
               </div>
 
+              {/* Phone */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">Номер телефона</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.phone}</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
-                  placeholder="+998 90 123 45 67"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  placeholder={t.order.phone_placeholder}
                   required
                 />
               </div>
 
+              {/* Call Time */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">Удобное время для звонка</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.call_time}</label>
                 <input
                   type="text"
                   value={formData.preferred_call_time}
                   onChange={(e) => setFormData({...formData, preferred_call_time: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
-                  placeholder="Например: с 9:00 до 18:00"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  placeholder={t.order.call_time_placeholder}
                 />
               </div>
 
+              {/* Passengers */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">Количество пассажиров</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.passengers}</label>
                 <select
                   value={formData.passengers_count}
                   onChange={(e) => setFormData({...formData, passengers_count: parseInt(e.target.value)})}
-                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
                 >
                   {[1, 2, 3, 4, 5, 6].map(num => (
-                    <option key={num} value={num}>{num}</option>
+                    <option key={num} value={num}>{num} чел.</option>
                   ))}
                 </select>
               </div>
 
+              {/* Comment */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">Комментарий</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.comment}</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
-                  placeholder="Пожелания к поездке"
+                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors resize-none"
+                  placeholder={t.order.comment_placeholder}
                   rows="3"
                 />
               </div>
 
+              {/* Error Message */}
               {submitStatus === 'error' && (
-                <div className="bg-[#3a2a2a] border border-[#4a3a3a] text-[#c97a7a] px-4 py-3 rounded-xl text-xs">
-                  Ошибка при отправке заявки. Пожалуйста, попробуйте ещё раз.
+                <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444] px-4 py-3 rounded-xl text-xs">
+                  Ошибка при отправке. Попробуйте ещё раз.
                 </div>
               )}
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={submitStatus === 'loading'}
-                className="w-full bg-[#4a4a4a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#5a5a5a] transition-all disabled:opacity-50 text-sm"
+                className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-xl font-medium hover:shadow-lg hover:shadow-[#6366f1]/30 transition-all disabled:opacity-50 text-sm"
               >
-                {submitStatus === 'loading' ? 'Отправка...' : '📞 Отправить заявку'}
+                {submitStatus === 'loading' ? t.buttons.sending : `📞 ${t.buttons.send_request}`}
               </button>
             </form>
           )}

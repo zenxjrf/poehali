@@ -39,19 +39,35 @@ async def cmd_start(message: types.Message):
                     ),
                     InlineKeyboardButton(
                         text="💬 Написать",
-                        url="https://t.me/admin"
+                        url="https://t.me/fakertop"
                     )
                 ]
             ]
         )
         
         await message.answer(
-            "👋 Добро пожаловать в Poehali!\n\n"
-            "🚕 Поездки Ташкент ↔ Фергана\n"
-            "💰 Фиксированная цена\n"
-            "👨‍✈️ Проверенные водители\n\n"
-            "Нажмите кнопку ниже, чтобы открыть меню:",
-            reply_markup=keyboard
+            "🚕 <b>Poehali — Ваше такси Ташкент ↔ Фергана</b>\n\n"
+            "📌 <b>Как заказать такси:</b>\n"
+            "1️⃣ Нажмите кнопку «🚕 Открыть меню»\n"
+            "2️⃣ Выберите направление поездки\n"
+            "3️⃣ Заполните форму заявки\n"
+            "4️⃣ Дождитесь звонка от диспетчера\n\n"
+            "💰 <b>Стоимость:</b>\n"
+            "• Поездка: 150 000 сум с человека\n"
+            "• Посылки: от 60 000 сум\n\n"
+            "⏱ <b>Время в пути:</b> ~4 часа\n"
+            "🚗 <b>Комфорт:</b> Кондиционер, удобные сиденья\n\n"
+            "📞 <b>Связь с диспетчером:</b>\n"
+            "• Кнопка «Позвонить» — быстрый звонок\n"
+            "• Кнопка «Написать» — чат в Telegram\n\n"
+            "✨ <b>Почему выбирают нас:</b>\n"
+            "✓ Фиксированная цена\n"
+            "✓ Проверенные водители\n"
+            "✓ Подача в удобное время\n"
+            "✓ Безопасность и комфорт\n\n"
+            "Нажмите кнопку ниже, чтобы начать:",
+            reply_markup=keyboard,
+            parse_mode="HTML"
         )
     except Exception as e:
         logger.error(f"Ошибка в cmd_start: {e}")
@@ -60,7 +76,7 @@ async def cmd_start(message: types.Message):
 @dp.callback_query(lambda c: c.data == "call_dispatcher")
 async def process_call(callback: types.CallbackQuery):
     try:
-        await callback.answer("📞 +998 90 123 45 67", show_alert=True)
+        await callback.answer("📞 +998 94 136 54 74", show_alert=True)
     except Exception as e:
         logger.error(f"Ошибка в process_call: {e}")
 
