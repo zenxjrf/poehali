@@ -11,7 +11,7 @@ const translations = { ru, uz }
 
 // Fallback для отсутствующих ключей
 const defaultTranslations = {
-  app_title: 'Poehali',
+  app_title: 'Поехали',
   app_subtitle: 'Ташкент ↔ Фергана',
   app_description: 'Быстро. Комфортно. Надёжно.',
   directions: {
@@ -217,7 +217,7 @@ function App() {
             <div className="absolute inset-0 border-2 border-[#3a3a3a] rounded-full"></div>
             <div className="absolute inset-0 border-2 border-t-[#6366f1] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
           </div>
-          <p className="text-[#8a8a8a] text-sm font-medium tracking-wider">POEHALI</p>
+          <p className="text-[#8a8a8a] text-sm font-medium tracking-wider">ПОЕХАЛИ</p>
         </div>
       </div>
     )
@@ -229,7 +229,7 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] text-[#e0e0e0] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4">
-          <span className="text-xs text-[#5a5a5a] font-mono tracking-wider">VER 1.2</span>
+          <span className="text-xs text-[#5a5a5a] font-mono tracking-wider">VER 1.3</span>
           <button
             onClick={toggleLanguage}
             className="bg-[#1f1f1f] hover:bg-[#2a2a2a] px-3 py-1.5 rounded-full text-xs font-semibold transition-all text-[#6b6b6b] border border-[#2a2a2a]"
@@ -246,7 +246,7 @@ function App() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-2xl mb-4 shadow-lg shadow-[#6366f1]/20">
                 <span className="text-3xl">🚕</span>
               </div>
-              <h1 className="text-2xl font-bold text-[#e0e0e0] mb-1 tracking-tight">Poehali</h1>
+              <h1 className="text-2xl font-bold text-[#e0e0e0] mb-1 tracking-tight">Поехали</h1>
               <p className="text-[#6b6b6b] text-sm font-medium">{t.app_subtitle}</p>
               <p className="text-[#4a4a4a] text-xs mt-2">{t.app_description}</p>
             </div>
@@ -300,7 +300,7 @@ function App() {
                 onClick={() => setCurrentView('order')}
                 className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-2xl font-medium hover:shadow-lg hover:shadow-[#6366f1]/30 transition-all text-sm"
               >
-                📞 {t.buttons.leave_request}
+                📋 {t.buttons.leave_request}
               </button>
 
               <div className="grid grid-cols-2 gap-2.5">
@@ -323,7 +323,7 @@ function App() {
 
         {/* Footer */}
         <div className="p-4 text-center">
-          <p className="text-[#3a3a3a] text-xs">© 2025 Poehali Taxi</p>
+          <p className="text-[#3a3a3a] text-xs">© 2025 Поехали Taxi</p>
         </div>
       </div>
     )
@@ -453,7 +453,7 @@ function App() {
                 disabled={submitStatus === 'loading'}
                 className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-xl font-medium hover:shadow-lg hover:shadow-[#6366f1]/30 transition-all disabled:opacity-50 text-sm"
               >
-                {submitStatus === 'loading' ? t.buttons.sending : `📞 ${t.buttons.send_request}`}
+                {submitStatus === 'loading' ? t.buttons.sending : `📋 ${t.buttons.send_request}`}
               </button>
             </form>
           )}
