@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
-const DISPATCHER_USERNAME = import.meta.env.VITE_DISPATCHER_USERNAME || 'admin'
+const DISPATCHER_USERNAME = 'fakertop'
 
 // Языковые пакеты
 import ru from './locales/ru.json'
@@ -72,8 +72,6 @@ function safeGet(obj, path, defaultVal = '') {
 function App() {
   const [currentView, setCurrentView] = useState('home')
   const [direction, setDirection] = useState('tashkent_fergana')
-  const [drivers, setDrivers] = useState([])
-  const [selectedDriver, setSelectedDriver] = useState(null)
   const [trip, setTrip] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [submitStatus, setSubmitStatus] = useState(null)
@@ -129,30 +127,14 @@ function App() {
     // Имитация загрузки для preloader
     setTimeout(() => {
       setIsLoading(false)
-    }, 1500)
+    }, 1000)
   }, [])
 
   useEffect(() => {
     if (!isLoading) {
-      fetchDrivers()
       fetchTrip()
     }
   }, [direction, isLoading])
-
-  const fetchDrivers = async () => {
-    try {
-      setApiError(null)
-      const response = await fetch(`${API_URL}/drivers`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      const data = await response.json()
-      setDrivers(data)
-    } catch (error) {
-      console.error('Ошибка загрузки водителей:', error)
-      setApiError('Не удалось загрузить список водителей. Проверьте подключение к интернету.')
-    }
-  }
 
   const fetchTrip = async () => {
     try {
@@ -165,7 +147,7 @@ function App() {
     } catch (error) {
       console.error('Ошибка загрузки поездки:', error)
       // Устанавливаем цену по умолчанию
-      setTrip({ id: 1, direction, price: 250000 })
+      setTrip({ id: 1, direction, price: 15000 })
     }
   }
 
@@ -210,8 +192,8 @@ function App() {
     }
   }
 
-  const handleCall = (phone) => {
-    window.location.href = `tel:${phone}`
+  const handleCall = () => {
+    window.location.href = 'tel:+998941365474'
   }
 
   const handleMessage = () => {
@@ -233,13 +215,17 @@ function App() {
     fergana_tashkent: safeGet(t, 'directions.fergana_tashkent', 'Фергана → Ташкент')
   }
 
+  // Цена: 15000 с человека + почта от 60000
+  const basePrice = 15000
+  const mailPrice = 60000
+
   // Preloader
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-500 to-blue-700 flex items-center justify-center">
+      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg font-semibold">{safeGet(t, 'app_title', 'Poehali')}</p>
+          <div className="w-12 h-12 border-3 border-[#4a4a4a] border-t-[#6b6b6b] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#8a8a8a] text-sm font-medium">Poehali</p>
         </div>
       </div>
     )
@@ -248,40 +234,49 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-500 to-blue-700 text-white p-4">
+      <div className="min-h-screen bg-[#1a1a1a] text-[#e0e0e0] p-4 flex flex-col">
+        {/* Версия */}
+        <div className="absolute top-4 left-4">
+          <span className="text-xs text-[#5a5a5a] font-mono">VER 1.1 [Beta]</span>
+        </div>
+
         {/* Переключатель языка */}
         <button
           onClick={toggleLanguage}
-          className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm font-semibold transition-all z-50"
+          className="absolute top-4 right-4 bg-[#2a2a2a] hover:bg-[#3a3a3a] px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-[#8a8a8a]"
         >
           {language === 'ru' ? 'UZ' : 'RU'}
         </button>
 
-        <div className="max-w-md mx-auto pt-8">
-          <h1 className="text-3xl font-bold text-center mb-2">{safeGet(t, 'app_title', 'Poehali')}</h1>
-          <p className="text-center opacity-90 mb-8">{safeGet(t, 'app_subtitle', 'Поездки с комфортом')}</p>
-
-          {apiError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-              {apiError}
-            </div>
-          )}
-
-          <div className="bg-white text-gray-800 rounded-2xl p-6 mb-4 shadow-lg">
-            <p className="text-sm text-gray-500 mb-1">{safeGet(t, 'trip_cost', 'Стоимость поездки')}</p>
-            <p className="text-2xl font-bold">
-              {trip ? `${trip.price.toLocaleString()} сум` : 'Загрузка...'}
-            </p>
-            <p className="text-gray-600 mt-2">{directionLabels[direction]}</p>
+        <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center">
+          {/* Заголовок */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-[#e0e0e0] mb-1">Poehali</h1>
+            <p className="text-[#6b6b6b] text-sm">Ташкент ↔ Фергана</p>
           </div>
 
-          <div className="space-y-3">
+          {/* Цена */}
+          <div className="bg-[#2a2a2a] rounded-2xl p-6 mb-6 border border-[#3a3a3a]">
+            <div className="text-center">
+              <p className="text-[#6b6b6b] text-xs mb-2 uppercase tracking-wide">Стоимость</p>
+              <div className="mb-4">
+                <p className="text-3xl font-bold text-[#e0e0e0]">{basePrice.toLocaleString()} сум</p>
+                <p className="text-[#6b6b6b] text-xs mt-1">с человека</p>
+              </div>
+              <div className="border-t border-[#3a3a3a] pt-4">
+                <p className="text-[#8a8a8a] text-xs">Посылки от <span className="text-[#e0e0e0] font-semibold">{mailPrice.toLocaleString()} сум</span></p>
+              </div>
+            </div>
+          </div>
+
+          {/* Направление */}
+          <div className="space-y-3 mb-8">
             <button
               onClick={() => setDirection('tashkent_fergana')}
-              className={`w-full py-4 rounded-xl font-semibold transition-all ${
+              className={`w-full py-4 rounded-xl font-medium transition-all text-sm ${
                 direction === 'tashkent_fergana'
-                  ? 'bg-white text-blue-600'
-                  : 'bg-white/20 hover:bg-white/30'
+                  ? 'bg-[#4a4a4a] text-[#e0e0e0]'
+                  : 'bg-[#2a2a2a] text-[#8a8a8a] hover:bg-[#3a3a3a]'
               }`}
             >
               📍 {directionLabels.tashkent_fergana}
@@ -289,240 +284,37 @@ function App() {
 
             <button
               onClick={() => setDirection('fergana_tashkent')}
-              className={`w-full py-4 rounded-xl font-semibold transition-all ${
+              className={`w-full py-4 rounded-xl font-medium transition-all text-sm ${
                 direction === 'fergana_tashkent'
-                  ? 'bg-white text-blue-600'
-                  : 'bg-white/20 hover:bg-white/30'
+                  ? 'bg-[#4a4a4a] text-[#e0e0e0]'
+                  : 'bg-[#2a2a2a] text-[#8a8a8a] hover:bg-[#3a3a3a]'
               }`}
             >
               📍 {directionLabels.fergana_tashkent}
             </button>
           </div>
 
-          <button
-            onClick={() => setCurrentView('drivers')}
-            className="w-full mt-4 bg-yellow-400 text-gray-800 py-4 rounded-xl font-semibold hover:bg-yellow-300 transition-all"
-          >
-            {safeGet(t, 'buttons.view_drivers', '👨‍✈️ Посмотреть водителей')}
-          </button>
-
-          <button
-            onClick={() => setCurrentView('order')}
-            className="w-full mt-3 bg-green-400 text-gray-800 py-4 rounded-xl font-semibold hover:bg-green-300 transition-all"
-          >
-            {safeGet(t, 'buttons.leave_request', '📞 Оставить заявку')}
-          </button>
-
-          {/* Кнопки связи */}
-          <div className="mt-6 flex gap-3">
+          {/* Кнопки */}
+          <div className="space-y-3 mt-auto">
             <button
-              onClick={() => handleCall('+998901234567')}
-              className="flex-1 bg-blue-400 text-white py-3 rounded-xl font-semibold hover:bg-blue-300 transition-all"
+              onClick={() => setCurrentView('order')}
+              className="w-full bg-[#4a4a4a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#5a5a5a] transition-all text-sm"
             >
-              {safeGet(t, 'buttons.call', '📞 Позвонить')}
-            </button>
-            <button
-              onClick={handleMessage}
-              className="flex-1 bg-purple-400 text-white py-3 rounded-xl font-semibold hover:bg-purple-300 transition-all"
-            >
-              {safeGet(t, 'buttons.message', '💬 Написать')}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Экран водителей
-  if (currentView === 'drivers') {
-    return (
-      <div className="min-h-screen bg-gray-100 p-4">
-        <div className="max-w-md mx-auto">
-          {/* Переключатель языка */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => setCurrentView('home')}
-              className="text-blue-600"
-            >
-              {safeGet(t, 'buttons.back', '← Назад')}
-            </button>
-            <h1 className="text-xl font-bold">{safeGet(t, 'drivers.title', 'Наши водители')}</h1>
-            <button
-              onClick={toggleLanguage}
-              className="bg-white px-3 py-1 rounded-lg text-sm font-semibold"
-            >
-              {language === 'ru' ? 'UZ' : 'RU'}
-            </button>
-          </div>
-
-          {apiError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
-              {apiError}
-            </div>
-          )}
-
-          {drivers.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-500">
-              <p className="text-4xl mb-4">🚗</p>
-              <p>Водители загружаются...</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {drivers.map(driver => (
-                <div
-                  key={driver.id}
-                  onClick={() => setSelectedDriver(driver)}
-                  className="bg-white rounded-xl p-4 shadow-md cursor-pointer active:scale-98 transition-transform"
-                >
-                  <div className="flex gap-4">
-                    <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden">
-                      {driver.photo_url ? (
-                        <img 
-                          src={driver.photo_url} 
-                          alt={driver.name} 
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = ''
-                            e.target.style.display = 'none'
-                            e.target.parentNode.innerHTML = '👨‍✈️'
-                          }}
-                        />
-                      ) : (
-                        '👨‍✈️'
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{driver.name}</h3>
-                      <p className="text-gray-600">{driver.car_brand} {driver.car_model}</p>
-                      <p className="text-sm text-gray-500">{driver.car_year} {safeGet(t, 'drivers.year', 'г.в.')}</p>
-                      <p className="text-sm text-gray-500">{safeGet(t, 'drivers.experience', 'Стаж')}: {driver.experience_years} {safeGet(t, 'drivers.years', 'лет')}</p>
-
-                      {/* Иконки удобств */}
-                      <div className="flex gap-2 mt-2">
-                        {driver.has_air_conditioning && (
-                          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">❄️</span>
-                        )}
-                        {driver.has_large_trunk && (
-                          <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">🧳</span>
-                        )}
-                        {driver.pets_allowed && (
-                          <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">🐾</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {driver.description && (
-                    <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-2 rounded">{driver.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  // Экран детального просмотра водителя
-  if (selectedDriver) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-4">
-        <div className="max-w-md mx-auto">
-          <button
-            onClick={() => setSelectedDriver(null)}
-            className="mb-4 text-blue-600"
-          >
-            {safeGet(t, 'buttons.back', '← Назад')}
-          </button>
-
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto flex items-center justify-center text-5xl mb-4 overflow-hidden">
-              {selectedDriver.photo_url ? (
-                <img 
-                  src={selectedDriver.photo_url} 
-                  alt={selectedDriver.name} 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = ''
-                    e.target.style.display = 'none'
-                    e.target.parentNode.innerHTML = '👨‍✈️'
-                  }}
-                />
-              ) : (
-                '👨‍✈️'
-              )}
-            </div>
-            <h2 className="text-2xl font-bold text-center mb-2">{selectedDriver.name}</h2>
-            <p className="text-center text-gray-600 mb-4">
-              {selectedDriver.car_brand} {selectedDriver.car_model} ({selectedDriver.car_year})
-            </p>
-
-            <div className="space-y-2 mb-4">
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-gray-600">{safeGet(t, 'drivers.experience', 'Стаж')}:</span>
-                <span className="font-semibold">{selectedDriver.experience_years} {safeGet(t, 'drivers.years', 'лет')}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-gray-600">{safeGet(t, 'drivers.car', 'Автомобиль')}:</span>
-                <span className="font-semibold">{selectedDriver.car_brand} {selectedDriver.car_model}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-gray-600">{safeGet(t, 'drivers.year', 'г.в.')}:</span>
-                <span className="font-semibold">{selectedDriver.car_year}</span>
-              </div>
-            </div>
-
-            {/* Удобства */}
-            <div className="mb-4 space-y-2">
-              {selectedDriver.has_air_conditioning && (
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span>❄️</span>
-                  <span>{safeGet(t, 'drivers.amenities.air_conditioning', '❄️ Кондиционер')}</span>
-                </div>
-              )}
-              {selectedDriver.has_large_trunk && (
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span>🧳</span>
-                  <span>{safeGet(t, 'drivers.amenities.large_trunk', '🧳 Большой багажник')}</span>
-                </div>
-              )}
-              {selectedDriver.pets_allowed && (
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span>🐾</span>
-                  <span>{safeGet(t, 'drivers.amenities.pets_allowed', '🐾 Можно с животными')}</span>
-                </div>
-              )}
-            </div>
-
-            {selectedDriver.description && (
-              <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                <p className="text-gray-700">{selectedDriver.description}</p>
-              </div>
-            )}
-
-            <button
-              onClick={() => {
-                setSelectedDriver(null)
-                setCurrentView('order')
-              }}
-              className="w-full bg-green-500 text-white py-3 rounded-xl font-semibold hover:bg-green-400 transition-all mb-3"
-            >
-              📞 {safeGet(t, 'buttons.leave_request', 'Оставить заявку')}
+              📞 Оставить заявку
             </button>
 
-            {/* Кнопки связи с водителем (заглушка) */}
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => handleCall('+998901234567')}
-                className="flex-1 bg-blue-500 text-white py-3 rounded-xl font-semibold hover:bg-blue-400 transition-all"
+                onClick={handleCall}
+                className="bg-[#2a2a2a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#3a3a3a] transition-all text-sm"
               >
-                {safeGet(t, 'buttons.call', '📞 Позвонить')}
+                📞 Позвонить
               </button>
               <button
                 onClick={handleMessage}
-                className="flex-1 bg-purple-500 text-white py-3 rounded-xl font-semibold hover:bg-purple-400 transition-all"
+                className="bg-[#2a2a2a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#3a3a3a] transition-all text-sm"
               >
-                {safeGet(t, 'buttons.message', '💬 Написать')}
+                💬 Написать
               </button>
             </div>
           </div>
@@ -534,93 +326,90 @@ function App() {
   // Экран формы заявки
   if (currentView === 'order') {
     return (
-      <div className="min-h-screen bg-gray-100 p-4">
+      <div className="min-h-screen bg-[#1a1a1a] text-[#e0e0e0] p-4">
         <div className="max-w-md mx-auto">
           {/* Переключатель языка */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-blue-600"
+              className="text-[#6b6b6b] hover:text-[#8a8a8a]"
             >
-              {safeGet(t, 'buttons.back', '← Назад')}
+              ← Назад
             </button>
-            <h1 className="text-xl font-bold">{safeGet(t, 'order.title', 'Заявка на поездку')}</h1>
+            <h1 className="text-base font-medium">Заявка на поездку</h1>
             <button
               onClick={toggleLanguage}
-              className="bg-white px-3 py-1 rounded-lg text-sm font-semibold"
+              className="bg-[#2a2a2a] px-3 py-1 rounded-lg text-xs font-semibold text-[#8a8a8a]"
             >
               {language === 'ru' ? 'UZ' : 'RU'}
             </button>
           </div>
 
           {submitStatus === 'success' ? (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-6 rounded-xl text-center">
-              <p className="text-4xl mb-4">{safeGet(t, 'success.icon', '✅')}</p>
-              <h2 className="text-xl font-bold mb-2">{safeGet(t, 'success.title', 'Заявка отправлена!')}</h2>
-              <p>{safeGet(t, 'success.message', 'Мы перезвоним вам в течение 5 минут.')}</p>
+            <div className="bg-[#2a2a2a] border border-[#3a3a3a] px-4 py-8 rounded-2xl text-center">
+              <p className="text-3xl mb-4">✅</p>
+              <h2 className="text-lg font-medium mb-2 text-[#e0e0e0]">Заявка отправлена!</h2>
+              <p className="text-[#6b6b6b] text-sm mb-4">Мы перезвоним вам в течение 5 минут.</p>
               <button
                 onClick={() => {
                   setSubmitStatus(null)
                   setCurrentView('home')
                 }}
-                className="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg"
+                className="bg-[#4a4a4a] text-[#e0e0e0] px-6 py-2.5 rounded-xl text-sm font-medium"
               >
-                {safeGet(t, 'buttons.return_to_menu', 'Вернуться в меню')}
+                Вернуться в меню
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 shadow-lg space-y-4">
+            <form onSubmit={handleSubmit} className="bg-[#2a2a2a] rounded-2xl p-5 border border-[#3a3a3a] space-y-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-1">{safeGet(t, 'order.direction', 'Направление')}</label>
-                <div className="bg-gray-100 p-3 rounded-lg font-semibold">
+                <label className="block text-xs text-[#6b6b6b] mb-2">Направление</label>
+                <div className="bg-[#1a1a1a] p-3 rounded-xl text-[#e0e0e0] text-sm">
                   {directionLabels[direction]}
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  {safeGet(t, 'order.price', 'Цена')}: {trip ? `${trip.price.toLocaleString()} сум` : '...'}
-                </p>
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">{safeGet(t, 'order.name', 'Ваше имя')}</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">Ваше имя</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={safeGet(t, 'order.name_placeholder', 'Введите имя')}
+                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
+                  placeholder="Введите имя"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">{safeGet(t, 'order.phone', 'Номер телефона')}</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">Номер телефона</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={safeGet(t, 'order.phone_placeholder', '+998 90 123 45 67')}
+                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
+                  placeholder="+998 90 123 45 67"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">{safeGet(t, 'order.call_time', 'Удобное время для звонка')}</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">Удобное время для звонка</label>
                 <input
                   type="text"
                   value={formData.preferred_call_time}
                   onChange={(e) => setFormData({...formData, preferred_call_time: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={safeGet(t, 'order.call_time_placeholder', 'Например: с 9:00 до 18:00')}
+                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
+                  placeholder="Например: с 9:00 до 18:00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">{safeGet(t, 'order.passengers', 'Количество пассажиров')}</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">Количество пассажиров</label>
                 <select
                   value={formData.passengers_count}
                   onChange={(e) => setFormData({...formData, passengers_count: parseInt(e.target.value)})}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
                 >
                   {[1, 2, 3, 4, 5, 6].map(num => (
                     <option key={num} value={num}>{num}</option>
@@ -629,18 +418,18 @@ function App() {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">{safeGet(t, 'order.comment', 'Комментарий')}</label>
+                <label className="block text-xs text-[#6b6b6b] mb-2">Комментарий</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={safeGet(t, 'order.comment_placeholder', 'Пожелания к поездке')}
+                  className="w-full bg-[#1a1a1a] border border-[#3a3a3a] rounded-xl p-3 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#4a4a4a]"
+                  placeholder="Пожелания к поездке"
                   rows="3"
                 />
               </div>
 
               {submitStatus === 'error' && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="bg-[#3a2a2a] border border-[#4a3a3a] text-[#c97a7a] px-4 py-3 rounded-xl text-xs">
                   Ошибка при отправке заявки. Пожалуйста, попробуйте ещё раз.
                 </div>
               )}
@@ -648,9 +437,9 @@ function App() {
               <button
                 type="submit"
                 disabled={submitStatus === 'loading'}
-                className="w-full bg-blue-500 text-white py-4 rounded-xl font-semibold hover:bg-blue-400 transition-all disabled:opacity-50"
+                className="w-full bg-[#4a4a4a] text-[#e0e0e0] py-4 rounded-xl font-medium hover:bg-[#5a5a5a] transition-all disabled:opacity-50 text-sm"
               >
-                {submitStatus === 'loading' ? safeGet(t, 'buttons.sending', 'Отправка...') : safeGet(t, 'buttons.send_request', '📞 Отправить заявку')}
+                {submitStatus === 'loading' ? 'Отправка...' : '📞 Отправить заявку'}
               </button>
             </form>
           )}
