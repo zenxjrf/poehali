@@ -7,12 +7,12 @@
     "fergana_tashkent": "Farg'ona → Toshkent"
   },
   "buttons": {
-    "view_drivers": "👨‍✈️ Haydovchilarni ko'rish",
-    "leave_request": "📞 Ariza qoldirish",
+    "view_drivers": "Haydovchilarni ko'rish",
+    "leave_request": "Ariza qoldirish",
     "back": "← Orqaga",
-    "call": "📞 Qo'ng'iroq qilish",
-    "message": "💬 Yozish",
-    "send_request": "📞 Arizani yuborish",
+    "call": "Qo'ng'iroq qilish",
+    "message": "Yozish",
+    "send_request": "Arizani yuborish",
     "sending": "Yuborilmoqda...",
     "return_to_menu": "Menyuga qaytish"
   },

@@ -7,12 +7,12 @@
     "fergana_tashkent": "Фергана → Ташкент"
   },
   "buttons": {
-    "view_drivers": "👨‍✈️ Посмотреть водителей",
-    "leave_request": "📞 Оставить заявку",
+    "view_drivers": "Посмотреть водителей",
+    "leave_request": "Оставить заявку",
     "back": "← Назад",
-    "call": "📞 Позвонить",
-    "message": "💬 Написать",
-    "send_request": "📞 Отправить заявку",
+    "call": "Позвонить",
+    "message": "Написать",
+    "send_request": "Отправить заявку",
     "sending": "Отправка...",
     "return_to_menu": "Вернуться в меню"
   },

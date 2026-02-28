@@ -306,15 +306,15 @@ function App() {
               <div className="grid grid-cols-2 gap-2.5">
                 <button
                   onClick={handleCall}
-                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a]"
+                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a] flex items-center justify-center gap-2"
                 >
-                  📞 {t.buttons.call}
+                  <span>📞</span> {t.buttons.call}
                 </button>
                 <button
                   onClick={handleMessage}
-                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a]"
+                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a] flex items-center justify-center gap-2"
                 >
-                  💬 {t.buttons.message}
+                  <span>💬</span> {t.buttons.message}
                 </button>
               </div>
             </div>
