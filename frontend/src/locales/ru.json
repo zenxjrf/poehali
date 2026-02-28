@@ -1,0 +1,54 @@
+{
+  "app_title": "Poehali",
+  "app_subtitle": "Поездки с комфортом",
+  "trip_cost": "Стоимость поездки",
+  "directions": {
+    "tashkent_fergana": "Ташкент → Фергана",
+    "fergana_tashkent": "Фергана → Ташкент"
+  },
+  "buttons": {
+    "view_drivers": "👨‍✈️ Посмотреть водителей",
+    "leave_request": "📞 Оставить заявку",
+    "back": "← Назад",
+    "call": "📞 Позвонить",
+    "message": "💬 Написать",
+    "send_request": "📞 Отправить заявку",
+    "sending": "Отправка...",
+    "return_to_menu": "Вернуться в меню"
+  },
+  "drivers": {
+    "title": "Наши водители",
+    "experience": "Стаж",
+    "years": "лет",
+    "car": "Автомобиль",
+    "year": "г.в.",
+    "amenities": {
+      "air_conditioning": "❄️ Кондиционер",
+      "large_trunk": "🧳 Большой багажник",
+      "pets_allowed": "🐾 Можно с животными"
+    }
+  },
+  "order": {
+    "title": "Заявка на поездку",
+    "direction": "Направление",
+    "price": "Цена",
+    "name": "Ваше имя",
+    "name_placeholder": "Введите имя",
+    "phone": "Номер телефона",
+    "phone_placeholder": "+998 90 123 45 67",
+    "call_time": "Удобное время для звонка",
+    "call_time_placeholder": "Например: с 9:00 до 18:00",
+    "passengers": "Количество пассажиров",
+    "comment": "Комментарий (необязательно)",
+    "comment_placeholder": "Пожелания к поездке"
+  },
+  "success": {
+    "title": "Заявка отправлена!",
+    "message": "Мы перезвоним вам в течение 5 минут.",
+    "icon": "✅"
+  },
+  "support": {
+    "title": "Поддержка",
+    "message": "Для связи с поддержкой напишите @admin"
+  }
+}

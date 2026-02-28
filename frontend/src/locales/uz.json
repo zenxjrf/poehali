@@ -1,0 +1,54 @@
+{
+  "app_title": "Poehali",
+  "app_subtitle": "Qulay sayohatlar",
+  "trip_cost": "Sayohat narxi",
+  "directions": {
+    "tashkent_fergana": "Toshkent → Farg'ona",
+    "fergana_tashkent": "Farg'ona → Toshkent"
+  },
+  "buttons": {
+    "view_drivers": "👨‍✈️ Haydovchilarni ko'rish",
+    "leave_request": "📞 Ariza qoldirish",
+    "back": "← Orqaga",
+    "call": "📞 Qo'ng'iroq qilish",
+    "message": "💬 Yozish",
+    "send_request": "📞 Arizani yuborish",
+    "sending": "Yuborilmoqda...",
+    "return_to_menu": "Menyuga qaytish"
+  },
+  "drivers": {
+    "title": "Bizning haydovchilar",
+    "experience": "Staj",
+    "years": "yil",
+    "car": "Avtomobil",
+    "year": "y.i.",
+    "amenities": {
+      "air_conditioning": "❄️ Konditsioner",
+      "large_trunk": "🧳 Katta bagajnik",
+      "pets_allowed": "🐾 Hayvonlar bilan mumkin"
+    }
+  },
+  "order": {
+    "title": "Sayohat uchun ariza",
+    "direction": "Yo'nalish",
+    "price": "Narx",
+    "name": "Ismingiz",
+    "name_placeholder": "Ismni kiriting",
+    "phone": "Telefon raqami",
+    "phone_placeholder": "+998 90 123 45 67",
+    "call_time": "Qo'ng'iroq uchun qulay vaqt",
+    "call_time_placeholder": "Masalan: 9:00 dan 18:00 gacha",
+    "passengers": "Yo'lovchilar soni",
+    "comment": "Izoh (ixtiyoriy)",
+    "comment_placeholder": "Sayohat bo'yicha istaklar"
+  },
+  "success": {
+    "title": "Ariza yuborildi!",
+    "message": "Biz sizga 5 daqiqa ichida qo'ng'iroq qilamiz.",
+    "icon": "✅"
+  },
+  "support": {
+    "title": "Qo'llab-quvvatlash",
+    "message": "Qo'llab-quvvatlash xizmati bilan bog'lanish uchun @admin yozing"
+  }
+}
