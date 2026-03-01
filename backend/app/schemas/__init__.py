@@ -68,6 +68,7 @@ class OrderBase(BaseModel):
     preferred_call_time: Optional[str] = None
     passengers_count: int = 1
     comment: Optional[str] = None
+    location: Optional[str] = None
 
 
 class OrderCreate(OrderBase):

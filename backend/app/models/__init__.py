@@ -47,11 +47,12 @@ class Order(Base):
     
     customer_name = Column(String(100), nullable=False)
     customer_phone = Column(String(20), nullable=False)
-    preferred_call_time = Column(String(50), nullable=True)  # Удобное время для звонка
-    passengers_count = Column(Integer, default=1)            # Количество пассажиров
+    preferred_call_time = Column(String(50), nullable=True)
+    passengers_count = Column(Integer, default=1)
     comment = Column(Text, nullable=True)
+    location = Column(String(500), nullable=True)  # Геолокация (Google Maps URL)
     
-    status = Column(String(20), default="new")  # new, processing, completed, cancelled
+    status = Column(String(20), default="new")
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

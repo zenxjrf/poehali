@@ -25,7 +25,9 @@ const defaultTranslations = {
     message: 'Написать',
     send_request: 'Отправить заявку',
     sending: 'Отправка...',
-    return_to_menu: 'Вернуться в меню'
+    return_to_menu: 'Вернуться в меню',
+    get_location: '📍 Использовать геолокацию',
+    location_added: '✅ Геолокация добавлена'
   },
   order: {
     title: 'Заявка на поездку',
@@ -39,7 +41,9 @@ const defaultTranslations = {
     call_time_placeholder: 'Например: с 9:00 до 18:00',
     passengers: 'Пассажиры',
     comment: 'Комментарий',
-    comment_placeholder: 'Пожелания к поездке'
+    comment_placeholder: 'Пожелания к поездке',
+    location: 'Ваша геолокация',
+    location_placeholder: 'Нажмите кнопку ниже чтобы добавить'
   },
   success: {
     title: 'Заявка отправлена!',
@@ -93,7 +97,8 @@ function App() {
     customer_phone: '',
     preferred_call_time: '',
     passengers_count: 1,
-    comment: ''
+    comment: '',
+    location: ''
   })
 
   useEffect(() => {
@@ -139,7 +144,37 @@ function App() {
       setTrip(data)
     } catch (error) {
       console.error('Ошибка загрузки поездки:', error)
-      setTrip({ id: 1, direction, price: 150000 })
+      setTrip({ id: 1, direction, price: 200000 })
+    }
+  }
+
+  const getLocation = () => {
+    if (tg && tg.LocationManager) {
+      tg.LocationManager.getData((location) => {
+        if (location && location.latitude && location.longitude) {
+          const locationUrl = `https://maps.google.com/?q=${location.latitude},${location.longitude}`
+          setFormData(prev => ({ ...prev, location: locationUrl }))
+          tg.showAlert('Геолокация добавлена!')
+        }
+      })
+    } else {
+      // Fallback через браузер
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords
+            const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`
+            setFormData(prev => ({ ...prev, location: locationUrl }))
+            if (tg) tg.showAlert('Геолокация добавлена!')
+          },
+          (error) => {
+            console.error('Ошибка получения геолокации:', error)
+            if (tg) tg.showAlert('Не удалось получить геолокацию')
+          }
+        )
+      } else {
+        if (tg) tg.showAlert('Геолокация не поддерживается')
+      }
     }
   }
 
@@ -205,19 +240,23 @@ function App() {
     fergana_tashkent: safeGet(t, 'directions.fergana_tashkent', 'Фергана → Ташкент')
   }
 
-  const basePrice = 150000
+  const basePrice = 200000
   const mailPrice = 60000
 
   // Preloader
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 border-2 border-[#3a3a3a] rounded-full"></div>
-            <div className="absolute inset-0 border-2 border-t-[#6366f1] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center relative overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 animate-pulse"></div>
+        
+        <div className="text-center relative z-10">
+          <div className="relative w-20 h-20 mx-auto mb-4">
+            <div className="absolute inset-0 border-2 border-gray-700 rounded-full"></div>
+            <div className="absolute inset-0 border-2 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-2 border-2 border-t-purple-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}"></div>
           </div>
-          <p className="text-[#8a8a8a] text-sm font-medium tracking-wider">ПОЕХАЛИ</p>
+          <p className="text-gray-400 text-sm font-semibold tracking-widest">ПОЕХАЛИ</p>
         </div>
       </div>
     )
@@ -226,93 +265,107 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] text-[#e0e0e0] flex flex-col">
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+
         {/* Header */}
-        <div className="flex items-center justify-between p-4">
-          <span className="text-xs text-[#5a5a5a] font-mono tracking-wider">VER 1.3</span>
+        <div className="flex items-center justify-between p-5 relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs text-gray-500 font-mono tracking-wider">VER 1.4</span>
+          </div>
           <button
             onClick={toggleLanguage}
-            className="bg-[#1f1f1f] hover:bg-[#2a2a2a] px-3 py-1.5 rounded-full text-xs font-semibold transition-all text-[#6b6b6b] border border-[#2a2a2a]"
+            className="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full text-xs font-semibold transition-all text-gray-400 border border-white/10 backdrop-blur-sm"
           >
             {language === 'ru' ? 'UZ' : 'RU'}
           </button>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col justify-center px-4 pb-8">
+        <div className="flex-1 flex flex-col justify-center px-5 pb-8 relative z-10">
           <div className="max-w-md mx-auto w-full">
             {/* Logo & Title */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] rounded-2xl mb-4 shadow-lg shadow-[#6366f1]/20">
-                <span className="text-3xl">🚕</span>
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl mb-5 shadow-2xl shadow-purple-500/30 transform hover:scale-105 transition-transform">
+                <span className="text-4xl">🚕</span>
               </div>
-              <h1 className="text-2xl font-bold text-[#e0e0e0] mb-1 tracking-tight">Поехали</h1>
-              <p className="text-[#6b6b6b] text-sm font-medium">{t.app_subtitle}</p>
-              <p className="text-[#4a4a4a] text-xs mt-2">{t.app_description}</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">Поехали</h1>
+              <p className="text-gray-400 text-sm font-medium">{t.app_subtitle}</p>
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <span className="px-3 py-1 bg-white/5 rounded-full text-xs text-gray-500 border border-white/10">✨ Быстро</span>
+                <span className="px-3 py-1 bg-white/5 rounded-full text-xs text-gray-500 border border-white/10">🛋 Комфортно</span>
+                <span className="px-3 py-1 bg-white/5 rounded-full text-xs text-gray-500 border border-white/10">🛡 Надёжно</span>
+              </div>
             </div>
 
             {/* Price Card */}
-            <div className="bg-gradient-to-br from-[#1f1f1f] to-[#2a2a2a] rounded-3xl p-6 mb-6 border border-[#2a2a2a] shadow-xl">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 mb-6 border border-white/10 shadow-2xl">
               <div className="text-center">
-                <p className="text-[#6b6b6b] text-xs mb-3 uppercase tracking-widest">{t.home.price_label}</p>
-                <div className="mb-5">
-                  <p className="text-4xl font-bold bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] bg-clip-text text-transparent">
+                <div className="inline-flex items-center gap-2 mb-4">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <p className="text-gray-400 text-xs uppercase tracking-widest">{t.home.price_label}</p>
+                </div>
+                <div className="mb-6">
+                  <p className="text-5xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                     {basePrice.toLocaleString()}
                   </p>
-                  <p className="text-[#6b6b6b] text-xs mt-1.5">{t.home.per_person}</p>
+                  <p className="text-gray-500 text-xs mt-2">{t.home.per_person}</p>
                 </div>
-                <div className="bg-[#1a1a1a] rounded-xl py-3 px-4">
-                  <p className="text-[#8a8a8a] text-xs">
-                    {t.home.mail_label} <span className="text-[#e0e0e0] font-semibold">{t.home.mail_from} {mailPrice.toLocaleString()} сум</span>
+                <div className="bg-black/20 rounded-2xl py-4 px-6 border border-white/5">
+                  <p className="text-gray-400 text-xs">
+                    {t.home.mail_label} <span className="text-white font-semibold">{t.home.mail_from} {mailPrice.toLocaleString()} сум</span>
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Direction Buttons */}
-            <div className="space-y-2.5 mb-6">
+            <div className="space-y-3 mb-6">
               <button
                 onClick={() => setDirection('tashkent_fergana')}
-                className={`w-full py-4 px-4 rounded-2xl font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                className={`w-full py-5 px-6 rounded-2xl font-medium transition-all text-sm flex items-center justify-center gap-3 ${
                   direction === 'tashkent_fergana'
-                    ? 'bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-[#6366f1]/25'
-                    : 'bg-[#1f1f1f] text-[#8a8a8a] hover:bg-[#2a2a2a] border border-[#2a2a2a]'
+                    ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-purple-500/30 scale-105'
+                    : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
                 }`}
               >
-                <span>📍</span> {directionLabels.tashkent_fergana}
+                <span className="text-lg">📍</span> {directionLabels.tashkent_fergana}
               </button>
 
               <button
                 onClick={() => setDirection('fergana_tashkent')}
-                className={`w-full py-4 px-4 rounded-2xl font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                className={`w-full py-5 px-6 rounded-2xl font-medium transition-all text-sm flex items-center justify-center gap-3 ${
                   direction === 'fergana_tashkent'
-                    ? 'bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-[#6366f1]/25'
-                    : 'bg-[#1f1f1f] text-[#8a8a8a] hover:bg-[#2a2a2a] border border-[#2a2a2a]'
+                    ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-purple-500/30 scale-105'
+                    : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
                 }`}
               >
-                <span>📍</span> {directionLabels.fergana_tashkent}
+                <span className="text-lg">📍</span> {directionLabels.fergana_tashkent}
               </button>
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               <button
                 onClick={() => setCurrentView('order')}
-                className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-2xl font-medium hover:shadow-lg hover:shadow-[#6366f1]/30 transition-all text-sm"
+                className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white py-5 rounded-2xl font-semibold hover:shadow-2xl hover:shadow-purple-500/40 transition-all text-sm transform hover:scale-105"
               >
                 📋 {t.buttons.leave_request}
               </button>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleCall}
-                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a] flex items-center justify-center gap-2"
+                  className="bg-white/5 text-white py-5 rounded-2xl font-medium hover:bg-white/10 transition-all text-sm border border-white/10 backdrop-blur-sm flex items-center justify-center gap-2"
                 >
                   <span>📞</span> {t.buttons.call}
                 </button>
                 <button
                   onClick={handleMessage}
-                  className="bg-[#1f1f1f] text-[#e0e0e0] py-4 rounded-2xl font-medium hover:bg-[#2a2a2a] transition-all text-sm border border-[#2a2a2a] flex items-center justify-center gap-2"
+                  className="bg-white/5 text-white py-5 rounded-2xl font-medium hover:bg-white/10 transition-all text-sm border border-white/10 backdrop-blur-sm flex items-center justify-center gap-2"
                 >
                   <span>💬</span> {t.buttons.message}
                 </button>
@@ -322,8 +375,8 @@ function App() {
         </div>
 
         {/* Footer */}
-        <div className="p-4 text-center">
-          <p className="text-[#3a3a3a] text-xs">© 2025 Поехали Taxi</p>
+        <div className="p-5 text-center relative z-10">
+          <p className="text-gray-600 text-xs">© 2025 Поехали Taxi • Все права защищены</p>
         </div>
       </div>
     )
@@ -332,58 +385,83 @@ function App() {
   // Экран формы заявки
   if (currentView === 'order') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] text-[#e0e0e0] p-4">
-        <div className="max-w-md mx-auto">
+      <div className="min-h-screen bg-[#0a0a0a] text-white p-5 relative overflow-hidden">
+        {/* Background elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
+
+        <div className="max-w-md mx-auto relative z-10">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-[#6b6b6b] hover:text-[#8a8a8a] transition-colors"
+              className="text-gray-400 hover:text-white transition-colors p-2"
             >
               ← Назад
             </button>
-            <h1 className="text-base font-medium text-[#e0e0e0]">{t.order.title}</h1>
+            <h1 className="text-base font-semibold text-white">{t.order.title}</h1>
             <button
               onClick={toggleLanguage}
-              className="bg-[#1f1f1f] px-3 py-1 rounded-full text-xs font-semibold text-[#6b6b6b] border border-[#2a2a2a]"
+              className="bg-white/5 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-400 border border-white/10"
             >
               {language === 'ru' ? 'UZ' : 'RU'}
             </button>
           </div>
 
           {submitStatus === 'success' ? (
-            <div className="bg-[#1f1f1f] border border-[#2a2a2a] px-6 py-10 rounded-3xl text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#22c55e] to-[#16a34a] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#22c55e]/20">
-                <p className="text-3xl">✅</p>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 px-8 py-12 rounded-3xl text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-green-500/30">
+                <p className="text-4xl">✅</p>
               </div>
-              <h2 className="text-lg font-semibold text-[#e0e0e0] mb-2">{t.success.title}</h2>
-              <p className="text-[#6b6b6b] text-sm mb-6">{t.success.message}</p>
+              <h2 className="text-xl font-bold text-white mb-3">{t.success.title}</h2>
+              <p className="text-gray-400 text-sm mb-8">{t.success.message}</p>
               <button
                 onClick={() => {
                   setSubmitStatus(null)
                   setCurrentView('home')
                 }}
-                className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white px-8 py-3 rounded-xl text-sm font-medium shadow-lg shadow-[#6366f1]/25"
+                className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white px-10 py-4 rounded-xl text-sm font-semibold shadow-2xl shadow-purple-500/30"
               >
                 {t.buttons.return_to_menu}
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-[#1f1f1f] rounded-3xl p-5 border border-[#2a2a2a] space-y-4">
+            <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 space-y-5">
               {/* Direction Info */}
-              <div className="bg-gradient-to-r from-[#6366f1]/10 to-[#8b5cf6]/10 rounded-xl p-4 mb-2">
-                <p className="text-[#6b6b6b] text-xs mb-1">{t.order.direction}</p>
-                <p className="text-[#e0e0e0] text-sm font-medium">{directionLabels[direction]}</p>
+              <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-5 border border-indigo-500/20">
+                <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">{t.order.direction}</p>
+                <p className="text-white text-sm font-semibold">{directionLabels[direction]}</p>
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="block text-xs text-gray-400 mb-2">{t.order.location}</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={formData.location}
+                    readOnly
+                    className="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-gray-300 text-sm focus:outline-none"
+                    placeholder={formData.location ? 'Геолокация добавлена' : t.order.location_placeholder}
+                  />
+                  <button
+                    type="button"
+                    onClick={getLocation}
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3.5 rounded-xl text-sm font-semibold transition-all shrink-0"
+                  >
+                    📍
+                  </button>
+                </div>
               </div>
 
               {/* Name */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.name}</label>
+                <label className="block text-xs text-gray-400 mb-2">{t.order.name}</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                   placeholder={t.order.name_placeholder}
                   required
                 />
@@ -391,12 +469,12 @@ function App() {
 
               {/* Phone */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.phone}</label>
+                <label className="block text-xs text-gray-400 mb-2">{t.order.phone}</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                   placeholder={t.order.phone_placeholder}
                   required
                 />
@@ -404,37 +482,37 @@ function App() {
 
               {/* Call Time */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.call_time}</label>
+                <label className="block text-xs text-gray-400 mb-2">{t.order.call_time}</label>
                 <input
                   type="text"
                   value={formData.preferred_call_time}
                   onChange={(e) => setFormData({...formData, preferred_call_time: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                   placeholder={t.order.call_time_placeholder}
                 />
               </div>
 
               {/* Passengers */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.passengers}</label>
+                <label className="block text-xs text-gray-400 mb-2">{t.order.passengers}</label>
                 <select
                   value={formData.passengers_count}
                   onChange={(e) => setFormData({...formData, passengers_count: parseInt(e.target.value)})}
-                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                 >
                   {[1, 2, 3, 4, 5, 6].map(num => (
-                    <option key={num} value={num}>{num} чел.</option>
+                    <option key={num} value={num} className="bg-[#0a0a0a]">{num} чел.</option>
                   ))}
                 </select>
               </div>
 
               {/* Comment */}
               <div>
-                <label className="block text-xs text-[#6b6b6b] mb-2">{t.order.comment}</label>
+                <label className="block text-xs text-gray-400 mb-2">{t.order.comment}</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-3.5 text-[#e0e0e0] text-sm focus:outline-none focus:border-[#6366f1] transition-colors resize-none"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none"
                   placeholder={t.order.comment_placeholder}
                   rows="3"
                 />
@@ -442,7 +520,7 @@ function App() {
 
               {/* Error Message */}
               {submitStatus === 'error' && (
-                <div className="bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444] px-4 py-3 rounded-xl text-xs">
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-xs">
                   Ошибка при отправке. Попробуйте ещё раз.
                 </div>
               )}
@@ -451,7 +529,7 @@ function App() {
               <button
                 type="submit"
                 disabled={submitStatus === 'loading'}
-                className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-4 rounded-xl font-medium hover:shadow-lg hover:shadow-[#6366f1]/30 transition-all disabled:opacity-50 text-sm"
+                className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white py-5 rounded-xl font-semibold hover:shadow-2xl hover:shadow-purple-500/40 transition-all disabled:opacity-50 text-sm transform hover:scale-105"
               >
                 {submitStatus === 'loading' ? t.buttons.sending : `📋 ${t.buttons.send_request}`}
               </button>
