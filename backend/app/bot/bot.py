@@ -4,7 +4,7 @@ import sys
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from app.config import settings
@@ -38,6 +38,30 @@ except Exception as e:
     raise
 
 
+def get_main_keyboard():
+    """Создаёт главную клавиатуру"""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🚕 Открыть меню",
+                    web_app=WebAppInfo(url=settings.WEB_APP_URL)
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="📞 Позвонить",
+                    callback_data="call_dispatcher"
+                ),
+                InlineKeyboardButton(
+                    text="💬 Написать",
+                    url="https://t.me/fakertop"
+                )
+            ]
+        ]
+    )
+
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     """Обработчик команды /start"""
@@ -47,30 +71,9 @@ async def cmd_start(message: types.Message):
     logger.info(f"📨 Команда /start от пользователя {user_id} (@{username})")
     
     try:
-        # Создаём клавиатуру
-        keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="🚕 Открыть меню",
-                        web_app=WebAppInfo(url=settings.WEB_APP_URL)
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="📞 Позвонить",
-                        callback_data="call_dispatcher"
-                    ),
-                    InlineKeyboardButton(
-                        text="💬 Написать",
-                        url="https://t.me/fakertop"
-                    )
-                ]
-            ]
-        )
+        keyboard = get_main_keyboard()
         
         logger.info(f"📤 Отправка сообщения с кнопками пользователю {user_id}")
-        logger.info(f"Клавиатура: {keyboard.inline_keyboard}")
         
         # Отправляем сообщение с кнопками
         response = await message.answer(

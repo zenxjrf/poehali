@@ -433,16 +433,10 @@ function App() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-white/[0.03] rounded-3xl p-6 border border-white/5">
-              {/* Direction Info */}
-              <div className="pb-5 border-b border-white/5">
-                <p className="text-neutral-500 text-[10px] tracking-widest uppercase mb-2">{t.order.direction}</p>
-                <p className="text-white text-sm font-light bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl px-4 py-3 border border-orange-500/20">{directionLabels[direction]}</p>
-              </div>
-
               {/* Location Button */}
               <div className="pb-5 border-b border-white/5">
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-neutral-500 text-[10px] tracking-widest uppercase">{t.order.location}</label>
+                  <label className="text-neutral-500 text-[10px] tracking-widest uppercase">Геолокация</label>
                   <button
                     type="button"
                     onClick={getLocation}
@@ -453,7 +447,7 @@ function App() {
                     }`}
                   >
                     <span>📍</span>
-                    {formData.location ? t.buttons.location_added : t.buttons.get_location}
+                    {formData.location ? 'Добавлена' : 'Добавить'}
                   </button>
                 </div>
                 {formData.location && (
