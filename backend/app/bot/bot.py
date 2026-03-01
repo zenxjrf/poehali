@@ -113,6 +113,13 @@ class Keyboards:
 # ИНИЦИАЛИЗАЦИЯ
 # =============================================================================
 
+# Глобальный объект бота (будет инициализирован при запуске)
+bot: Optional[Bot] = None
+
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
+
+
 @asynccontextmanager
 async def bot_lifespan(bot: Bot):
     """Управление жизненным циклом бота"""
@@ -124,10 +131,6 @@ async def bot_lifespan(bot: Bot):
     logger.info("=" * 60)
     yield
     logger.info("👋 Завершение работы бота...")
-
-
-storage = MemoryStorage()
-dp = Dispatcher(storage=storage)
 
 
 # =============================================================================

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 try:
     # Определение диалекта
-    if settings.DATABASE_URL.startswith("sqlite"):
+    if "sqlite" in settings.DATABASE_URL:
         engine = create_async_engine(
             settings.DATABASE_URL,
             echo=False,

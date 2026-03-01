@@ -2,6 +2,13 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+from .review import ReviewBase, ReviewCreate, ReviewResponse
+
+__all__ = ['DriverBase', 'DriverCreate', 'DriverUpdate', 'DriverResponse',
+           'TripBase', 'TripCreate', 'TripResponse',
+           'OrderBase', 'OrderCreate', 'OrderUpdate', 'OrderResponse',
+           'ReviewBase', 'ReviewCreate', 'ReviewResponse']
+
 
 # Driver schemas
 class DriverBase(BaseModel):
