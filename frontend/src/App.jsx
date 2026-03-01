@@ -254,7 +254,7 @@ function App() {
           <div className="relative w-20 h-20 mx-auto mb-4">
             <div className="absolute inset-0 border-2 border-gray-700 rounded-full"></div>
             <div className="absolute inset-0 border-2 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
-            <div className="absolute inset-2 border-2 border-t-purple-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}"></div>
+            <div className="absolute inset-2 border-2 border-t-purple-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin reverse-spin"></div>
           </div>
           <p className="text-gray-400 text-sm font-semibold tracking-widest">ПОЕХАЛИ</p>
         </div>

@@ -26,3 +26,7 @@ body {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+.reverse-spin {
+  animation: spin 1.5s linear infinite reverse;
+}
