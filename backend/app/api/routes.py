@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +14,7 @@ from app.schemas import (
     OrderCreate, OrderResponse, OrderUpdate,
     ReviewCreate, ReviewResponse
 )
+from app.bot import bot, send_review_notification
 
 logger = logging.getLogger(__name__)
 
@@ -214,8 +216,6 @@ async def create_review(review: ReviewCreate, db: AsyncSession = Depends(get_db)
         await db.refresh(db_review)
 
         # Отправляем уведомление администратору
-        from app.bot import bot
-        import asyncio
         asyncio.create_task(send_review_notification(bot, review.model_dump(), db_review.id))
 
         return db_review
