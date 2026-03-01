@@ -8,11 +8,11 @@
   },
   "buttons": {
     "view_drivers": "Посмотреть водителей",
-    "leave_request": "Оставить заявку",
+    "leave_request": "Оставить отзыв",
     "back": "← Назад",
     "call": "Позвонить",
     "message": "Написать",
-    "send_request": "Отправить заявку",
+    "send_request": "Отправить отзыв",
     "sending": "Отправка...",
     "return_to_menu": "Вернуться в меню"
   },

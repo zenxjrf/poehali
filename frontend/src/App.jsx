@@ -236,9 +236,15 @@ function App() {
   // Проверка прав администратора
   const isAdmin = () => {
     try {
+      // Получаем Telegram User ID
       const tgUserId = tg?.initDataUnsafe?.user?.id?.toString()
-      return tgUserId && ADMIN_TELEGRAM_IDS.includes(tgUserId)
-    } catch {
+      console.log('Telegram User ID:', tgUserId)
+      console.log('Admin IDs:', ADMIN_TELEGRAM_IDS)
+      const isAdmin = tgUserId && ADMIN_TELEGRAM_IDS.includes(tgUserId)
+      console.log('Is admin:', isAdmin)
+      return isAdmin
+    } catch (error) {
+      console.error('Ошибка проверки админа:', error)
       return false
     }
   }
@@ -269,10 +275,10 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-gray-200 text-gray-900 flex flex-col relative overflow-hidden">
+      <div className="min-h-screen bg-gray-300 text-gray-900 flex flex-col relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-400/30 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-400/30 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-500/35 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-500/35 to-transparent rounded-full blur-3xl"></div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 relative z-10">
@@ -394,10 +400,10 @@ function App() {
   // Экран формы отзыва
   if (currentView === 'review') {
     return (
-      <div className="min-h-screen bg-gray-200 text-gray-900 p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-gray-300 text-gray-900 p-6 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-400/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-400/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-500/35 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-500/35 rounded-full blur-3xl"></div>
 
         <div className="max-w-sm mx-auto relative z-10">
           {/* Header */}
@@ -533,9 +539,9 @@ function App() {
   // Админ-панель
   if (isAdminView) {
     return (
-      <div className="min-h-screen bg-gray-200 text-gray-900 p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-400/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-400/30 rounded-full blur-3xl"></div>
+      <div className="min-h-screen bg-gray-300 text-gray-900 p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-500/35 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-500/35 rounded-full blur-3xl"></div>
 
         <div className="max-w-3xl mx-auto relative z-10">
           {/* Header */}
