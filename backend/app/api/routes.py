@@ -6,11 +6,12 @@ from sqlalchemy import select
 from typing import List
 
 from app.database import get_db
-from app.models import Driver, Trip, Order
+from app.models import Driver, Trip, Order, Review
 from app.schemas import (
     DriverResponse, DriverCreate, DriverUpdate,
     TripResponse,
-    OrderCreate, OrderResponse, OrderUpdate
+    OrderCreate, OrderResponse, OrderUpdate,
+    ReviewCreate, ReviewResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -200,4 +201,35 @@ async def update_order(order_id: int, order: OrderUpdate, db: AsyncSession = Dep
         raise
     except Exception as e:
         logger.error(f"Ошибка обновления заказа: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка сервера")
+
+
+# Reviews endpoints
+@router.post("/reviews", response_model=ReviewResponse)
+async def create_review(review: ReviewCreate, db: AsyncSession = Depends(get_db)):
+    try:
+        db_review = Review(**review.model_dump())
+        db.add(db_review)
+        await db.commit()
+        await db.refresh(db_review)
+        
+        # Отправляем уведомление администратору
+        from app.bot.bot import send_review_notification
+        import asyncio
+        asyncio.create_task(send_review_notification(review.model_dump(), db_review.id))
+        
+        return db_review
+    except Exception as e:
+        logger.error(f"Ошибка создания отзыва: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка сервера")
+
+
+@router.get("/reviews", response_model=List[ReviewResponse])
+async def get_reviews(db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(select(Review).order_by(Review.created_at.desc()))
+        reviews = result.scalars().all()
+        return reviews
+    except Exception as e:
+        logger.error(f"Ошибка получения отзывов: {e}")
         raise HTTPException(status_code=500, detail="Ошибка сервера")

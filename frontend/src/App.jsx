@@ -19,42 +19,28 @@ const defaultTranslations = {
     fergana_tashkent: 'Фергана → Ташкент'
   },
   buttons: {
-    leave_request: 'Заказать',
+    leave_request: 'Оставить отзыв',
     back: '← Назад',
     call: 'Позвонить',
     message: 'Написать',
     send_request: 'Отправить',
     sending: 'Отправка...',
-    return_to_menu: 'В меню',
-    get_location: '📍 Геолокация',
-    location_added: '✅ Добавлена'
+    return_to_menu: 'В меню'
   },
-  order: {
-    title: 'Заявка',
-    direction: 'Направление',
-    price: 'Цена',
-    name: 'Имя',
-    name_placeholder: 'Ваше имя',
+  review: {
+    title: 'Оставить отзыв',
+    rating: 'Оцените сервис',
+    name: 'Ваше имя',
+    name_placeholder: 'Как к вам обращаться',
     phone: 'Телефон',
     phone_placeholder: '+998 90 123 45 67',
-    call_time: 'Время звонка',
-    call_time_placeholder: 'Например: 10:00 - 18:00',
-    passengers: 'Пассажиры',
-    comment: 'Комментарий',
-    comment_placeholder: 'Пожелания',
-    location: 'Геолокация',
-    location_placeholder: 'Добавить местоположение'
+    review: 'Ваш отзыв',
+    review_placeholder: 'Расскажите о вашей поездке...'
   },
   success: {
-    title: 'Готово!',
-    message: 'Перезвоним в течение 5 минут',
+    title: 'Спасибо за отзыв!',
+    message: 'Ваше мнение очень важно для нас',
     icon: '✓'
-  },
-  home: {
-    price_label: 'Стоимость',
-    per_person: 'с человека',
-    mail_label: 'Посылки',
-    mail_from: 'от'
   }
 }
 
@@ -95,10 +81,8 @@ function App() {
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_phone: '',
-    preferred_call_time: '',
-    passengers_count: 1,
     comment: '',
-    location: ''
+    rating: 0
   })
 
   useEffect(() => {
@@ -148,69 +132,12 @@ function App() {
     }
   }
 
-  const getLocation = () => {
-    console.log('📍 Запрос геолокации...')
-    
-    // Пробуем через Telegram WebApp
-    if (tg && tg.LocationManager) {
-      console.log('Используем Telegram LocationManager')
-      tg.LocationManager.getData((location) => {
-        console.log('Telegram location:', location)
-        if (location && location.latitude && location.longitude) {
-          const locationUrl = `https://maps.google.com/?q=${location.latitude},${location.longitude}`
-          setFormData(prev => ({ ...prev, location: locationUrl }))
-          if (tg) tg.showAlert('✅ Геолокация добавлена!')
-        } else {
-          if (tg) tg.showAlert('❌ Не удалось получить геолокацию')
-        }
-      })
-    } 
-    // Fallback через браузер
-    else if (navigator.geolocation) {
-      console.log('Используем браузерную геолокацию')
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log('Browser location:', position.coords)
-          const { latitude, longitude } = position.coords
-          const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`
-          setFormData(prev => ({ ...prev, location: locationUrl }))
-          if (tg) tg.showAlert('✅ Геолокация добавлена!')
-          else alert('✅ Геолокация добавлена!')
-        },
-        (error) => {
-          console.error('Ошибка геолокации:', error)
-          let errorMsg = '❌ Не удалось получить геолокацию'
-          if (error.code === 1) {
-            errorMsg = '❌ Доступ к геолокации запрещён. Разрешите в настройках браузера.'
-          } else if (error.code === 2) {
-            errorMsg = '❌ Позиция недоступна'
-          } else if (error.code === 3) {
-            errorMsg = '❌ Превышено время ожидания'
-          }
-          console.error(errorMsg)
-          if (tg) tg.showAlert(errorMsg)
-          else alert(errorMsg)
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0
-        }
-      )
-    } else {
-      const msg = '❌ Геолокация не поддерживается браузером'
-      console.error(msg)
-      if (tg) tg.showAlert(msg)
-      else alert(msg)
-    }
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitStatus('loading')
 
     try {
-      const response = await fetch(`${API_URL}/orders`, {
+      const response = await fetch(`${API_URL}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -223,23 +150,12 @@ function App() {
 
       if (response.ok) {
         setSubmitStatus('success')
-        if (tg) {
-          try {
-            tg.sendData(JSON.stringify({
-              type: 'order',
-              ...formData,
-              direction,
-              price: trip?.price
-            }))
-          } catch (error) {
-            console.warn('Не удалось отправить данные в Telegram:', error)
-          }
-        }
+        setFormData({ customer_name: '', customer_phone: '', comment: '', rating: 0 })
       } else {
         setSubmitStatus('error')
       }
     } catch (error) {
-      console.error('Ошибка отправки заявки:', error)
+      console.error('Ошибка отправки отзыва:', error)
       setSubmitStatus('error')
     }
   }
@@ -298,7 +214,7 @@ function App() {
         <div className="flex items-center justify-between px-6 py-5 relative z-10">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse shadow-lg shadow-orange-400/50"></div>
-            <span className="text-[10px] text-neutral-500 tracking-widest uppercase">Ver 2.0</span>
+            <span className="text-[10px] text-neutral-500 tracking-widest uppercase">Ver 2.1</span>
           </div>
           <button
             onClick={toggleLanguage}
@@ -326,14 +242,14 @@ function App() {
 
             {/* Price Card */}
             <div className="backdrop-blur-xl bg-white/[0.03] rounded-3xl p-8 mb-8 border border-white/5 shadow-2xl shadow-orange-500/5">
-              <p className="text-neutral-600 text-[10px] tracking-widest uppercase text-center mb-6">{t.home.price_label}</p>
+              <p className="text-neutral-600 text-[10px] tracking-widest uppercase text-center mb-6">{safeGet(t, 'home.price_label', 'Стоимость')}</p>
               <div className="text-center mb-6">
                 <p className="text-6xl font-extralight text-white tracking-tighter">{basePrice.toLocaleString()}</p>
-                <p className="text-neutral-600 text-xs mt-4 uppercase tracking-wider">{t.home.per_person}</p>
+                <p className="text-neutral-600 text-xs mt-4 uppercase tracking-wider">{safeGet(t, 'home.per_person', 'с человека')}</p>
               </div>
               <div className="flex items-center justify-center gap-3 pt-6 border-t border-white/5">
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent to-orange-500/20"></div>
-                <p className="text-neutral-500 text-xs">{t.home.mail_label} <span className="text-neutral-300 font-medium">{t.home.mail_from} {mailPrice.toLocaleString()}</span></p>
+                <p className="text-neutral-500 text-xs">{safeGet(t, 'home.mail_label', 'Посылки')} <span className="text-neutral-300 font-medium">{safeGet(t, 'home.mail_from', 'от')} {mailPrice.toLocaleString()}</span></p>
                 <div className="flex-1 h-px bg-gradient-to-l from-transparent to-orange-500/20"></div>
               </div>
             </div>
@@ -366,10 +282,10 @@ function App() {
             {/* Action Buttons */}
             <div className="space-y-3">
               <button
-                onClick={() => setCurrentView('order')}
+                onClick={() => setCurrentView('review')}
                 className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 font-medium"
               >
-                {t.buttons.leave_request}
+                ⭐ {t.buttons.leave_request}
               </button>
 
               <div className="grid grid-cols-2 gap-3">
@@ -398,13 +314,13 @@ function App() {
     )
   }
 
-  // Экран формы заявки
-  if (currentView === 'order') {
+  // Экран формы отзыва
+  if (currentView === 'review') {
     return (
       <div className="min-h-screen bg-black text-white p-6 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-purple-600/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-pink-600/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-600/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-600/5 rounded-full blur-3xl"></div>
 
         <div className="max-w-sm mx-auto relative z-10">
           {/* Header */}
@@ -413,9 +329,9 @@ function App() {
               onClick={() => setCurrentView('home')}
               className="text-neutral-400 hover:text-white transition-colors p-2 -ml-2"
             >
-              ←
+              ← Назад
             </button>
-            <h1 className="text-xs font-medium text-white tracking-widest uppercase">{t.order.title}</h1>
+            <h1 className="text-xs font-medium text-white tracking-widest uppercase">Оставить отзыв</h1>
             <button
               onClick={toggleLanguage}
               className="text-xs text-neutral-400 hover:text-white transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
@@ -429,11 +345,11 @@ function App() {
               <div className="w-20 h-20 mx-auto mb-6 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl blur-lg opacity-50"></div>
                 <div className="relative w-full h-full bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl border border-white/5 flex items-center justify-center">
-                  <p className="text-orange-400 text-3xl font-light">{t.success.icon}</p>
+                  <p className="text-orange-400 text-3xl font-light">✓</p>
                 </div>
               </div>
-              <h2 className="text-xl font-light text-white mb-3">{t.success.title}</h2>
-              <p className="text-neutral-400 text-xs mb-8">{t.success.message}</p>
+              <h2 className="text-xl font-light text-white mb-3">Спасибо за отзыв!</h2>
+              <p className="text-neutral-400 text-xs mb-8">Ваше мнение очень важно для нас</p>
               <button
                 onClick={() => {
                   setSubmitStatus(null)
@@ -441,102 +357,77 @@ function App() {
                 }}
                 className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-10 py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30"
               >
-                {t.buttons.return_to_menu}
+                В меню
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-white/[0.03] rounded-3xl p-6 border border-white/5">
-              {/* Location Button */}
+              {/* Rating */}
               <div className="pb-5 border-b border-white/5">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-neutral-500 text-[10px] tracking-widest uppercase">Геолокация</label>
-                  <button
-                    type="button"
-                    onClick={getLocation}
-                    className={`transition-colors text-xs flex items-center gap-2 px-4 py-2 rounded-xl ${
-                      formData.location 
-                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' 
-                        : 'bg-white/5 text-neutral-400 hover:text-orange-400 border border-white/10'
-                    }`}
-                  >
-                    <span>📍</span>
-                    {formData.location ? 'Добавлена' : 'Добавить'}
-                  </button>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-4 text-center">Оцените сервис</label>
+                <div className="flex justify-center gap-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFormData({...formData, rating: star})}
+                      className={`text-4xl transition-all ${
+                        formData.rating >= star 
+                          ? 'text-orange-500 scale-110' 
+                          : 'text-neutral-700 hover:text-neutral-500'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
                 </div>
-                {formData.location && (
-                  <div className="bg-orange-500/10 rounded-xl px-4 py-3 border border-orange-500/20">
-                    <p className="text-orange-400 text-xs truncate">📍 Геолокация добавлена</p>
-                    <p className="text-neutral-500 text-[10px] mt-1 truncate">{formData.location}</p>
-                  </div>
-                )}
-                {!formData.location && (
-                  <p className="text-neutral-600 text-xs bg-white/[0.02] rounded-xl px-4 py-3 border border-white/5">
-                    Нажмите кнопку чтобы добавить местоположение
+                {formData.rating > 0 && (
+                  <p className="text-neutral-400 text-xs text-center mt-4">
+                    {formData.rating === 5 && 'Отлично! ⭐⭐⭐⭐⭐'}
+                    {formData.rating === 4 && 'Хорошо! ⭐⭐⭐⭐'}
+                    {formData.rating === 3 && 'Нормально ⭐⭐⭐'}
+                    {formData.rating === 2 && 'Плохо ⭐⭐'}
+                    {formData.rating === 1 && 'Ужасно ⭐'}
                   </p>
                 )}
               </div>
 
               {/* Name */}
               <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.name}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">Ваше имя</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
                   className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
-                  placeholder={t.order.name_placeholder}
+                  placeholder="Как к вам обращаться"
                   required
                 />
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.phone}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">Телефон</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
                   className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
-                  placeholder={t.order.phone_placeholder}
+                  placeholder="+998 90 123 45 67"
                   required
                 />
               </div>
 
-              {/* Call Time */}
+              {/* Review Text */}
               <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.call_time}</label>
-                <input
-                  type="text"
-                  value={formData.preferred_call_time}
-                  onChange={(e) => setFormData({...formData, preferred_call_time: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
-                  placeholder={t.order.call_time_placeholder}
-                />
-              </div>
-
-              {/* Passengers */}
-              <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.passengers}</label>
-                <select
-                  value={formData.passengers_count}
-                  onChange={(e) => setFormData({...formData, passengers_count: parseInt(e.target.value)})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors backdrop-blur-sm"
-                >
-                  {[1, 2, 3, 4].map(num => (
-                    <option key={num} value={num} className="bg-black text-white">{num}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Comment */}
-              <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.comment}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">Ваш отзыв</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
                   className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm resize-none"
-                  placeholder={t.order.comment_placeholder}
-                  rows="3"
+                  placeholder="Расскажите о вашей поездке..."
+                  rows="5"
+                  required
                 />
               </div>
 
@@ -550,10 +441,10 @@ function App() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={submitStatus === 'loading'}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 disabled:opacity-50 font-medium"
+                disabled={submitStatus === 'loading' || !formData.rating}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {submitStatus === 'loading' ? t.buttons.sending : t.buttons.send_request}
+                {submitStatus === 'loading' ? 'Отправка...' : 'Отправить отзыв'}
               </button>
             </form>
           )}

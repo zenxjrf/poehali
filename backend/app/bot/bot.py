@@ -106,48 +106,20 @@ async def process_call(callback: types.CallbackQuery):
         logger.error(f"❌ Ошибка в process_call: {e}", exc_info=True)
 
 
-async def send_order_notification(order_data: dict, order_id: int = None):
-    """Отправка уведомления о новом заказе в чат администратора"""
-    global order_counter
-    
+async def send_review_notification(review_data: dict, review_id: int):
+    """Отправка уведомления о новом отзыве в чат администратора"""
     try:
-        # Увеличиваем счётчик
-        order_counter += 1
-        order_number = order_counter if order_id is None else order_id
+        # Звёзды
+        stars = '⭐' * review_data.get('rating', 0)
         
-        direction_labels = {
-            'tashkent_fergana': 'Ташкент → Фергана',
-            'fergana_tashkent': 'Фергана → Ташкент'
-        }
-        
-        # Короткое уведомление
-        short_text = (
-            f"🔔 Поступила заявка №{order_number:03d}\n\n"
-            f"👤 {order_data.get('customer_name', 'Клиент')}\n"
-            f"📞 {order_data.get('customer_phone', '')}\n"
-            f"🚕 {direction_labels.get(order_data.get('direction', ''), 'Направление')}\n"
-            f"💰 {order_data.get('price', 0):,} сум"
+        text = (
+            f"⭐ <b>НОВЫЙ ОТЗЫВ №{review_id:03d}</b>\n\n"
+            f"{'⭐⭐⭐⭐⭐' if review_data.get('rating') == 5 else '⭐⭐⭐⭐' if review_data.get('rating') == 4 else '⭐⭐⭐' if review_data.get('rating') == 3 else '⭐⭐' if review_data.get('rating') == 2 else '⭐'}\n\n"
+            f"👤 <b>Клиент:</b> {review_data.get('customer_name', 'Не указано')}\n"
+            f"📞 <b>Телефон:</b> <code>{review_data.get('customer_phone', 'Не указан')}</code>\n"
+            f"💬 <b>Отзыв:</b>\n{review_data.get('comment', 'Нет')}\n\n"
+            f"🕒 <b>Время:</b> {review_data.get('created_at', 'Только что')}"
         )
-        
-        # Полная информация
-        full_text = (
-            f"🔔 ПОСТУПИЛА ЗАЯВКА №{order_number:03d}\n\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"👤 Клиент: {order_data.get('customer_name', 'Не указано')}\n"
-            f"📞 Телефон: {order_data.get('customer_phone', 'Не указан')}\n"
-            f"🚕 Направление: {direction_labels.get(order_data.get('direction', 'Не указано'))}\n"
-            f"⏰ Удобное время: {order_data.get('preferred_call_time', 'Не указано')}\n"
-            f"👥 Пассажиры: {order_data.get('passengers_count', 1)} чел.\n"
-            f"💬 Комментарий: {order_data.get('comment', 'Нет') or 'Нет'}\n"
-            f"💰 Цена: {order_data.get('price', 0):,} сум\n"
-        )
-        
-        # Добавляем геолокацию если есть
-        location = order_data.get('location')
-        if location:
-            full_text += f"\n📍 Геолокация: {location}"
-        
-        full_text += f"\n\n🕒 Время: {order_data.get('created_at', 'Только что')}"
         
         # Кнопки действий
         keyboard = InlineKeyboardMarkup(
@@ -155,30 +127,25 @@ async def send_order_notification(order_data: dict, order_id: int = None):
                 [
                     InlineKeyboardButton(
                         text="📞 Позвонить",
-                        url=f"tel:{order_data.get('customer_phone', '')}"
+                        url=f"tel:{review_data.get('customer_phone', '')}"
                     )
                 ],
                 [
                     InlineKeyboardButton(
                         text="💬 Написать",
-                        url=f"https://t.me/+{order_data.get('customer_phone', '').replace('+', '').replace(' ', '')}"
+                        url=f"https://t.me/+{review_data.get('customer_phone', '').replace('+', '').replace(' ', '')}"
                     )
                 ]
             ]
         )
         
-        # Отправляем уведомления
         await bot.send_message(
             chat_id=settings.ADMIN_CHAT_ID,
-            text=short_text
+            text=text,
+            reply_markup=keyboard,
+            parse_mode="HTML"
         )
         
-        await bot.send_message(
-            chat_id=settings.ADMIN_CHAT_ID,
-            text=full_text,
-            reply_markup=keyboard
-        )
-        
-        logger.info(f"✅ Уведомление №{order_number} отправлено")
+        logger.info(f"✅ Отзыв №{review_id} отправлен администратору")
     except Exception as e:
-        logger.error(f"❌ Ошибка отправки уведомления: {e}", exc_info=True)
+        logger.error(f"❌ Ошибка отправки отзыва: {e}", exc_info=True)

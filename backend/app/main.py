@@ -7,10 +7,10 @@ from contextlib import asynccontextmanager
 
 from app.database import engine, Base
 from app.api import api_router
-from app.bot.bot import bot, dp, send_order_notification
+from app.bot.bot import bot, dp, send_review_notification
 from app.config import settings
-from app.models import Driver, Trip, Order
-from app.schemas import OrderCreate
+from app.models import Driver, Trip, Order, Review
+from app.schemas import ReviewCreate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
