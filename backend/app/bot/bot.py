@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -10,8 +11,11 @@ from app.config import settings
 
 # Настраиваем логирование
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -19,6 +23,7 @@ logger = logging.getLogger(__name__)
 order_counter = 0
 
 # Инициализация бота и диспетчера
+logger.info("=" * 50)
 logger.info("🔧 Инициализация бота...")
 logger.info(f"BOT_TOKEN: {settings.BOT_TOKEN[:20]}...")
 logger.info(f"WEB_APP_URL: {settings.WEB_APP_URL}")
@@ -38,6 +43,7 @@ async def cmd_start(message: types.Message):
     """Обработчик команды /start"""
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name
+    logger.info("=" * 50)
     logger.info(f"📨 Команда /start от пользователя {user_id} (@{username})")
     
     try:
@@ -64,6 +70,7 @@ async def cmd_start(message: types.Message):
         )
         
         logger.info(f"📤 Отправка сообщения с кнопками пользователю {user_id}")
+        logger.info(f"Клавиатура: {keyboard.inline_keyboard}")
         
         # Отправляем сообщение с кнопками
         response = await message.answer(
@@ -77,9 +84,11 @@ async def cmd_start(message: types.Message):
         )
         
         logger.info(f"✅ Сообщение успешно отправлено! Message ID: {response.message_id}")
+        logger.info("=" * 50)
         
     except Exception as e:
         logger.error(f"❌ Ошибка в cmd_start: {e}", exc_info=True)
+        logger.error(f"Тип ошибки: {type(e).__name__}")
         await message.answer("❌ Произошла ошибка. Попробуйте позже.")
 
 
@@ -89,6 +98,7 @@ async def process_call(callback: types.CallbackQuery):
     try:
         logger.info(f"📞 Нажата кнопка 'Позвонить' от {callback.from_user.id}")
         await callback.answer("📞 +998 94 136 54 74", show_alert=True)
+        logger.info("✅ Ответ отправлен")
     except Exception as e:
         logger.error(f"❌ Ошибка в process_call: {e}", exc_info=True)
 

@@ -149,31 +149,46 @@ function App() {
   }
 
   const getLocation = () => {
+    // Пробуем через Telegram WebApp
     if (tg && tg.LocationManager) {
       tg.LocationManager.getData((location) => {
         if (location && location.latitude && location.longitude) {
           const locationUrl = `https://maps.google.com/?q=${location.latitude},${location.longitude}`
           setFormData(prev => ({ ...prev, location: locationUrl }))
-          tg.showAlert('Геолокация добавлена!')
+          if (tg) tg.showAlert('✅ Геолокация добавлена!')
+        } else {
+          if (tg) tg.showAlert('❌ Не удалось получить геолокацию')
         }
       })
+    } 
+    // Fallback через браузер
+    else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords
+          const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`
+          setFormData(prev => ({ ...prev, location: locationUrl }))
+          if (tg) tg.showAlert('✅ Геолокация добавлена!')
+          else alert('✅ Геолокация добавлена!')
+        },
+        (error) => {
+          console.error('Ошибка геолокации:', error)
+          const errorMsg = error.code === 1 
+            ? '❌ Доступ к геолокации запрещён' 
+            : '❌ Не удалось получить геолокацию'
+          if (tg) tg.showAlert(errorMsg)
+          else alert(errorMsg)
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      )
     } else {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords
-            const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`
-            setFormData(prev => ({ ...prev, location: locationUrl }))
-            if (tg) tg.showAlert('Геолокация добавлена!')
-          },
-          (error) => {
-            console.error('Ошибка получения геолокации:', error)
-            if (tg) tg.showAlert('Не удалось получить геолокацию')
-          }
-        )
-      } else {
-        if (tg) tg.showAlert('Геолокация не поддерживается')
-      }
+      const msg = '❌ Геолокация не поддерживается браузером'
+      if (tg) tg.showAlert(msg)
+      else alert(msg)
     }
   }
 
@@ -246,13 +261,13 @@ function App() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/10 via-black to-cyan-900/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/10 via-black to-red-900/10"></div>
         <div className="text-center relative z-10">
-          <div className="w-16 h-16 border-2 border-cyan-500/30 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm bg-black/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 animate-pulse"></div>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-[shimmer_2s_infinite]"></div>
+          <div className="w-16 h-16 border-2 border-orange-500/30 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm bg-black/50">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 animate-pulse"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-[shimmer_2s_infinite]"></div>
           </div>
-          <p className="text-cyan-400/40 text-xs tracking-[0.3em] uppercase font-light">Poehali</p>
+          <p className="text-orange-400/40 text-xs tracking-[0.3em] uppercase font-light">Poehali</p>
         </div>
       </div>
     )
@@ -263,14 +278,14 @@ function App() {
     return (
       <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-cyan-600/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-teal-600/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-600/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-600/5 to-transparent rounded-full blur-3xl"></div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse shadow-lg shadow-cyan-400/50"></div>
-            <span className="text-[10px] text-neutral-500 tracking-widest uppercase">Ver 1.9</span>
+            <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse shadow-lg shadow-orange-400/50"></div>
+            <span className="text-[10px] text-neutral-500 tracking-widest uppercase">Ver 2.0</span>
           </div>
           <button
             onClick={toggleLanguage}
@@ -286,27 +301,27 @@ function App() {
             {/* Logo & Title */}
             <div className="text-center mb-12">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-3xl blur-lg opacity-50 animate-pulse"></div>
-                <div className="relative w-full h-full bg-gradient-to-br from-cyan-500/20 to-teal-500/20 backdrop-blur-xl rounded-3xl border border-white/10 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl blur-lg opacity-50 animate-pulse"></div>
+                <div className="relative w-full h-full bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-3xl border border-white/10 flex items-center justify-center">
                   <span className="text-4xl">🚕</span>
                 </div>
               </div>
-              <h1 className="text-4xl font-light text-white mb-3 tracking-tight bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">Поехали</h1>
+              <h1 className="text-4xl font-light text-white mb-3 tracking-tight bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent">Поехали</h1>
               <p className="text-neutral-400 text-xs tracking-widest uppercase mb-6">{t.app_subtitle}</p>
-              <div className="w-px h-16 bg-gradient-to-b from-cyan-500/50 via-cyan-500/20 to-transparent mx-auto"></div>
+              <div className="w-px h-16 bg-gradient-to-b from-orange-500/50 via-orange-500/20 to-transparent mx-auto"></div>
             </div>
 
             {/* Price Card */}
-            <div className="backdrop-blur-xl bg-white/[0.03] rounded-3xl p-8 mb-8 border border-white/5 shadow-2xl shadow-cyan-500/5">
+            <div className="backdrop-blur-xl bg-white/[0.03] rounded-3xl p-8 mb-8 border border-white/5 shadow-2xl shadow-orange-500/5">
               <p className="text-neutral-600 text-[10px] tracking-widest uppercase text-center mb-6">{t.home.price_label}</p>
               <div className="text-center mb-6">
                 <p className="text-6xl font-extralight text-white tracking-tighter">{basePrice.toLocaleString()}</p>
                 <p className="text-neutral-600 text-xs mt-4 uppercase tracking-wider">{t.home.per_person}</p>
               </div>
               <div className="flex items-center justify-center gap-3 pt-6 border-t border-white/5">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-cyan-500/20"></div>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-orange-500/20"></div>
                 <p className="text-neutral-500 text-xs">{t.home.mail_label} <span className="text-neutral-300 font-medium">{t.home.mail_from} {mailPrice.toLocaleString()}</span></p>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-cyan-500/20"></div>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-orange-500/20"></div>
               </div>
             </div>
 
@@ -316,7 +331,7 @@ function App() {
                 onClick={() => setDirection('tashkent_fergana')}
                 className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
                   direction === 'tashkent_fergana'
-                    ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg shadow-cyan-600/20'
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-600/20'
                     : 'bg-white/[0.02] text-neutral-500 hover:bg-white/[0.05] border border-white/5'
                 }`}
               >
@@ -327,7 +342,7 @@ function App() {
                 onClick={() => setDirection('fergana_tashkent')}
                 className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
                   direction === 'fergana_tashkent'
-                    ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg shadow-cyan-600/20'
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-600/20'
                     : 'bg-white/[0.02] text-neutral-500 hover:bg-white/[0.05] border border-white/5'
                 }`}
               >
@@ -339,7 +354,7 @@ function App() {
             <div className="space-y-3">
               <button
                 onClick={() => setCurrentView('order')}
-                className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-cyan-600/30 font-medium"
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 font-medium"
               >
                 {t.buttons.leave_request}
               </button>
@@ -399,9 +414,9 @@ function App() {
           {submitStatus === 'success' ? (
             <div className="text-center py-20 backdrop-blur-xl bg-white/[0.03] rounded-3xl border border-white/5">
               <div className="w-20 h-20 mx-auto mb-6 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-2xl blur-lg opacity-50"></div>
-                <div className="relative w-full h-full bg-gradient-to-br from-cyan-500/20 to-teal-500/20 backdrop-blur-xl rounded-2xl border border-white/5 flex items-center justify-center">
-                  <p className="text-cyan-400 text-3xl font-light">{t.success.icon}</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl blur-lg opacity-50"></div>
+                <div className="relative w-full h-full bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl border border-white/5 flex items-center justify-center">
+                  <p className="text-orange-400 text-3xl font-light">{t.success.icon}</p>
                 </div>
               </div>
               <h2 className="text-xl font-light text-white mb-3">{t.success.title}</h2>
@@ -411,7 +426,7 @@ function App() {
                   setSubmitStatus(null)
                   setCurrentView('home')
                 }}
-                className="bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-10 py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-cyan-600/30"
+                className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-10 py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30"
               >
                 {t.buttons.return_to_menu}
               </button>
@@ -421,7 +436,7 @@ function App() {
               {/* Direction Info */}
               <div className="pb-5 border-b border-white/5">
                 <p className="text-neutral-500 text-[10px] tracking-widest uppercase mb-2">{t.order.direction}</p>
-                <p className="text-white text-sm font-light bg-gradient-to-r from-cyan-500/10 to-teal-500/10 rounded-xl px-4 py-3 border border-cyan-500/20">{directionLabels[direction]}</p>
+                <p className="text-white text-sm font-light bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl px-4 py-3 border border-orange-500/20">{directionLabels[direction]}</p>
               </div>
 
               {/* Location Button */}
@@ -433,8 +448,8 @@ function App() {
                     onClick={getLocation}
                     className={`transition-colors text-xs flex items-center gap-2 px-4 py-2 rounded-xl ${
                       formData.location 
-                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' 
-                        : 'bg-white/5 text-neutral-400 hover:text-cyan-400 border border-white/10'
+                        ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' 
+                        : 'bg-white/5 text-neutral-400 hover:text-orange-400 border border-white/10'
                     }`}
                   >
                     <span>📍</span>
@@ -442,14 +457,14 @@ function App() {
                   </button>
                 </div>
                 {formData.location && (
-                  <div className="bg-cyan-500/10 rounded-xl px-4 py-3 border border-cyan-500/20">
-                    <p className="text-cyan-400 text-xs truncate">📍 Геолокация добавлена</p>
+                  <div className="bg-orange-500/10 rounded-xl px-4 py-3 border border-orange-500/20">
+                    <p className="text-orange-400 text-xs truncate">📍 Геолокация добавлена</p>
                     <p className="text-neutral-500 text-[10px] mt-1 truncate">{formData.location}</p>
                   </div>
                 )}
                 {!formData.location && (
                   <p className="text-neutral-600 text-xs bg-white/[0.02] rounded-xl px-4 py-3 border border-white/5">
-                    Нажмите кнопку выше чтобы добавить местоположение
+                    Нажмите кнопку чтобы добавить местоположение
                   </p>
                 )}
               </div>
@@ -461,7 +476,7 @@ function App() {
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
                   placeholder={t.order.name_placeholder}
                   required
                 />
@@ -474,7 +489,7 @@ function App() {
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
                   placeholder={t.order.phone_placeholder}
                   required
                 />
@@ -487,7 +502,7 @@ function App() {
                   type="text"
                   value={formData.preferred_call_time}
                   onChange={(e) => setFormData({...formData, preferred_call_time: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
                   placeholder={t.order.call_time_placeholder}
                 />
               </div>
@@ -498,7 +513,7 @@ function App() {
                 <select
                   value={formData.passengers_count}
                   onChange={(e) => setFormData({...formData, passengers_count: parseInt(e.target.value)})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors backdrop-blur-sm"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors backdrop-blur-sm"
                 >
                   {[1, 2, 3, 4].map(num => (
                     <option key={num} value={num} className="bg-black text-white">{num}</option>
@@ -512,7 +527,7 @@ function App() {
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-cyan-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm resize-none"
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm resize-none"
                   placeholder={t.order.comment_placeholder}
                   rows="3"
                 />
@@ -529,7 +544,7 @@ function App() {
               <button
                 type="submit"
                 disabled={submitStatus === 'loading'}
-                className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-cyan-600/30 disabled:opacity-50 font-medium"
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 disabled:opacity-50 font-medium"
               >
                 {submitStatus === 'loading' ? t.buttons.sending : t.buttons.send_request}
               </button>
