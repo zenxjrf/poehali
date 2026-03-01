@@ -9,6 +9,21 @@ console.log('API_URL:', API_URL)
 console.log('DISPATCHER_USERNAME:', DISPATCHER_USERNAME)
 console.log('ADMIN_TELEGRAM_IDS:', ADMIN_TELEGRAM_IDS)
 
+// Проверка доступности API
+async function checkApiAvailability() {
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    const response = await fetch(`${API_URL.replace('/api/v1', '')}/health`, {
+      signal: controller.signal
+    })
+    clearTimeout(timeoutId)
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 // Языковые пакеты
 import ru from './locales/ru.json'
 import uz from './locales/uz.json'
@@ -84,6 +99,21 @@ function App() {
   })
   const [orderSubmitting, setOrderSubmitting] = useState(false)
   const [locationLoading, setLocationLoading] = useState(false)
+  const [apiAvailable, setApiAvailable] = useState(true)
+  const [checkingApi, setCheckingApi] = useState(true)
+
+  // Проверка API при загрузке
+  useEffect(() => {
+    const checkApi = async () => {
+      setCheckingApi(true)
+      const available = await checkApiAvailability()
+      console.log('=== API AVAILABILITY ===')
+      console.log('API available:', available)
+      setApiAvailable(available)
+      setCheckingApi(false)
+    }
+    checkApi()
+  }, [])
 
   // Объединяем с fallback
   const langData = translations[language] || {}
@@ -426,6 +456,17 @@ function App() {
   if (currentView === 'home') {
     return (
       <div className="min-h-screen bg-gray-300 text-gray-900 flex flex-col relative overflow-hidden">
+        {/* Уведомление о недоступности API */}
+        {!apiAvailable && !checkingApi && (
+          <div className="bg-red-500 text-white px-4 py-3 text-xs text-center font-medium">
+            ⚠️ Сервер недоступен. Попробуйте позже.
+          </div>
+        )}
+        {checkingApi && (
+          <div className="bg-blue-500 text-white px-4 py-3 text-xs text-center font-medium">
+            🔍 Проверка соединения...
+          </div>
+        )}
         {/* Background Effects */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-500/35 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-500/35 to-transparent rounded-full blur-3xl"></div>
@@ -525,15 +566,29 @@ function App() {
             {/* Action Buttons */}
             <div className="space-y-3">
               <button
-                onClick={() => setCurrentView('order')}
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-blue-600/30 font-medium"
+                onClick={() => {
+                  if (!apiAvailable) {
+                    alert('⚠️ Сервер временно недоступен. Попробуйте позже.')
+                    return
+                  }
+                  setCurrentView('order')
+                }}
+                disabled={!apiAvailable}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-blue-600/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 🚕 Оставить заявку
               </button>
               
               <button
-                onClick={() => setCurrentView('review')}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 font-medium"
+                onClick={() => {
+                  if (!apiAvailable) {
+                    alert('⚠️ Сервер временно недоступен. Попробуйте позже.')
+                    return
+                  }
+                  setCurrentView('review')
+                }}
+                disabled={!apiAvailable}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 ⭐ Оставить отзыв
               </button>
