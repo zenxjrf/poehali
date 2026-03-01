@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
-const DISPATCHER_USERNAME = 'fakertop'
+const DISPATCHER_USERNAME = 'abdurasulovb'
+const ADMIN_TELEGRAM_IDS = ['123456789', '987654321'] // Telegram ID администраторов
 
 // Языковые пакеты
 import ru from './locales/ru.json'
@@ -168,6 +169,22 @@ function App() {
     window.open(`https://t.me/${DISPATCHER_USERNAME}`, '_blank', 'noopener,noreferrer')
   }
 
+  const loadAdminData = async () => {
+    setAdminLoading(true)
+    try {
+      const [reviewsRes, ordersRes] = await Promise.all([
+        fetch(`${API_URL}/reviews`),
+        fetch(`${API_URL}/orders`)
+      ])
+      const reviews = await reviewsRes.json()
+      const orders = await ordersRes.json()
+      setAdminData({ reviews, orders })
+    } catch (error) {
+      console.error('Ошибка загрузки данных админ-панели:', error)
+    }
+    setAdminLoading(false)
+  }
+
   const toggleLanguage = () => {
     const newLang = language === 'ru' ? 'uz' : 'ru'
     setLanguage(newLang)
@@ -183,20 +200,34 @@ function App() {
     fergana_tashkent: safeGet(t, 'directions.fergana_tashkent', 'Фергана → Ташкент')
   }
 
-  const basePrice = 200000
+  const basePrice = 150000
   const mailPrice = 60000
+
+  // Проверка прав администратора
+  const isAdmin = () => {
+    try {
+      const tgUserId = tg?.initDataUnsafe?.user?.id?.toString()
+      return tgUserId && ADMIN_TELEGRAM_IDS.includes(tgUserId)
+    } catch {
+      return false
+    }
+  }
+
+  const [isAdminView, setIsAdminView] = useState(false)
+  const [adminData, setAdminData] = useState({ reviews: [], orders: [] })
+  const [adminLoading, setAdminLoading] = useState(false)
 
   // Preloader
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-900/10 via-black to-red-900/10"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-100/30 via-gray-50 to-red-100/10"></div>
         <div className="text-center relative z-10">
-          <div className="w-16 h-16 border-2 border-orange-500/30 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm bg-black/50">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 animate-pulse"></div>
+          <div className="w-16 h-16 border-2 border-orange-200 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm bg-white/50">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-red-400/20 animate-pulse"></div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-[shimmer_2s_infinite]"></div>
           </div>
-          <p className="text-orange-400/40 text-xs tracking-[0.3em] uppercase font-light">Poehali</p>
+          <p className="text-orange-600/60 text-xs tracking-[0.3em] uppercase font-medium">Poehali</p>
         </div>
       </div>
     )
@@ -205,23 +236,36 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
+      <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-600/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-600/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-200/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-200/20 to-transparent rounded-full blur-3xl"></div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse shadow-lg shadow-orange-400/50"></div>
-            <span className="text-[10px] text-neutral-500 tracking-widest uppercase">Ver 2.1</span>
+            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse shadow-lg shadow-orange-500/30"></div>
+            <span className="text-[10px] text-gray-500 tracking-widest uppercase">Ver 2.1</span>
           </div>
-          <button
-            onClick={toggleLanguage}
-            className="text-xs text-neutral-400 hover:text-white transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
-          >
-            {language === 'ru' ? 'UZ' : 'RU'}
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin() && (
+              <button
+                onClick={() => {
+                  setIsAdminView(!isAdminView)
+                  if (!isAdminView) loadAdminData()
+                }}
+                className="text-xs text-gray-600 hover:text-orange-600 transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/70 px-3 py-1.5 rounded-full border border-gray-200"
+              >
+                ⚙️
+              </button>
+            )}
+            <button
+              onClick={toggleLanguage}
+              className="text-xs text-gray-600 hover:text-orange-600 transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/70 px-3 py-1.5 rounded-full border border-gray-200"
+            >
+              {language === 'ru' ? 'UZ' : 'RU'}
+            </button>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -230,27 +274,27 @@ function App() {
             {/* Logo & Title */}
             <div className="text-center mb-12">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl blur-lg opacity-50 animate-pulse"></div>
-                <div className="relative w-full h-full bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-3xl border border-white/10 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-400 rounded-3xl blur-lg opacity-40 animate-pulse"></div>
+                <div className="relative w-full h-full bg-white backdrop-blur-xl rounded-3xl border border-gray-200 shadow-xl flex items-center justify-center">
                   <span className="text-4xl">🚕</span>
                 </div>
               </div>
-              <h1 className="text-4xl font-light text-white mb-3 tracking-tight bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent">Поехали</h1>
-              <p className="text-neutral-400 text-xs tracking-widest uppercase mb-6">{t.app_subtitle}</p>
-              <div className="w-px h-16 bg-gradient-to-b from-orange-500/50 via-orange-500/20 to-transparent mx-auto"></div>
+              <h1 className="text-4xl font-semibold text-gray-900 mb-3 tracking-tight">Поехали</h1>
+              <p className="text-gray-500 text-xs tracking-widest uppercase mb-6">{t.app_subtitle}</p>
+              <div className="w-px h-16 bg-gradient-to-b from-orange-400/50 via-orange-400/20 to-transparent mx-auto"></div>
             </div>
 
             {/* Price Card */}
-            <div className="backdrop-blur-xl bg-white/[0.03] rounded-3xl p-8 mb-8 border border-white/5 shadow-2xl shadow-orange-500/5">
-              <p className="text-neutral-600 text-[10px] tracking-widest uppercase text-center mb-6">{safeGet(t, 'home.price_label', 'Стоимость')}</p>
+            <div className="backdrop-blur-xl bg-white rounded-3xl p-8 mb-8 border border-gray-200 shadow-xl shadow-orange-500/5">
+              <p className="text-gray-400 text-[10px] tracking-widest uppercase text-center mb-6">{safeGet(t, 'home.price_label', 'Стоимость')}</p>
               <div className="text-center mb-6">
-                <p className="text-6xl font-extralight text-white tracking-tighter">{basePrice.toLocaleString()}</p>
-                <p className="text-neutral-600 text-xs mt-4 uppercase tracking-wider">{safeGet(t, 'home.per_person', 'с человека')}</p>
+                <p className="text-6xl font-light text-gray-900 tracking-tighter">{basePrice.toLocaleString()}</p>
+                <p className="text-gray-500 text-xs mt-4 uppercase tracking-wider">{safeGet(t, 'home.per_person', 'с человека')}</p>
               </div>
-              <div className="flex items-center justify-center gap-3 pt-6 border-t border-white/5">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-orange-500/20"></div>
-                <p className="text-neutral-500 text-xs">{safeGet(t, 'home.mail_label', 'Посылки')} <span className="text-neutral-300 font-medium">{safeGet(t, 'home.mail_from', 'от')} {mailPrice.toLocaleString()}</span></p>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-orange-500/20"></div>
+              <div className="flex items-center justify-center gap-3 pt-6 border-t border-gray-100">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-orange-400/30"></div>
+                <p className="text-gray-500 text-xs">{safeGet(t, 'home.mail_label', 'Посылки')} <span className="text-gray-700 font-medium">{safeGet(t, 'home.mail_from', 'от')} {mailPrice.toLocaleString()}</span></p>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-orange-400/30"></div>
               </div>
             </div>
 
@@ -258,10 +302,10 @@ function App() {
             <div className="space-y-3 mb-6">
               <button
                 onClick={() => setDirection('tashkent_fergana')}
-                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
+                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm font-medium ${
                   direction === 'tashkent_fergana'
-                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-600/20'
-                    : 'bg-white/[0.02] text-neutral-500 hover:bg-white/[0.05] border border-white/5'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
                 {directionLabels.tashkent_fergana}
@@ -269,10 +313,10 @@ function App() {
 
               <button
                 onClick={() => setDirection('fergana_tashkent')}
-                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
+                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm font-medium ${
                   direction === 'fergana_tashkent'
-                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg shadow-orange-600/20'
-                    : 'bg-white/[0.02] text-neutral-500 hover:bg-white/[0.05] border border-white/5'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/25'
+                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
                 {directionLabels.fergana_tashkent}
@@ -283,7 +327,7 @@ function App() {
             <div className="space-y-3">
               <button
                 onClick={() => setCurrentView('review')}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 font-medium"
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 font-medium"
               >
                 ⭐ {t.buttons.leave_request}
               </button>
@@ -291,13 +335,13 @@ function App() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleCall}
-                  className="bg-white/[0.02] text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/[0.05] border border-white/5 backdrop-blur-sm"
+                  className="bg-white text-gray-700 py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-gray-50 border border-gray-200 backdrop-blur-sm font-medium"
                 >
                   {t.buttons.call}
                 </button>
                 <button
                   onClick={handleMessage}
-                  className="bg-white/[0.02] text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/[0.05] border border-white/5 backdrop-blur-sm"
+                  className="bg-white text-gray-700 py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-gray-50 border border-gray-200 backdrop-blur-sm font-medium"
                 >
                   {t.buttons.message}
                 </button>
@@ -308,7 +352,7 @@ function App() {
 
         {/* Footer */}
         <div className="px-6 py-5 text-center relative z-10">
-          <p className="text-neutral-700 text-[9px] tracking-widest uppercase">© 2025 Poehali Taxi</p>
+          <p className="text-gray-400 text-[9px] tracking-widest uppercase">© 2025 Poehali Taxi</p>
         </div>
       </div>
     )
@@ -317,54 +361,54 @@ function App() {
   // Экран формы отзыва
   if (currentView === 'review') {
     return (
-      <div className="min-h-screen bg-black text-white p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-gray-50 text-gray-900 p-6 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-600/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-600/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-200/20 rounded-full blur-3xl"></div>
 
         <div className="max-w-sm mx-auto relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-neutral-400 hover:text-white transition-colors p-2 -ml-2"
+              className="text-gray-600 hover:text-gray-900 transition-colors p-2 -ml-2 font-medium"
             >
               ← Назад
             </button>
-            <h1 className="text-xs font-medium text-white tracking-widest uppercase">Оставить отзыв</h1>
+            <h1 className="text-xs font-medium text-gray-900 tracking-widest uppercase">Оставить отзыв</h1>
             <button
               onClick={toggleLanguage}
-              className="text-xs text-neutral-400 hover:text-white transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
+              className="text-xs text-gray-600 hover:text-orange-600 transition-colors tracking-widest uppercase backdrop-blur-sm bg-white px-3 py-1.5 rounded-full border border-gray-200"
             >
               {language === 'ru' ? 'UZ' : 'RU'}
             </button>
           </div>
 
           {submitStatus === 'success' ? (
-            <div className="text-center py-20 backdrop-blur-xl bg-white/[0.03] rounded-3xl border border-white/5">
+            <div className="text-center py-20 backdrop-blur-xl bg-white rounded-3xl border border-gray-200 shadow-xl">
               <div className="w-20 h-20 mx-auto mb-6 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl blur-lg opacity-50"></div>
-                <div className="relative w-full h-full bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl border border-white/5 flex items-center justify-center">
-                  <p className="text-orange-400 text-3xl font-light">✓</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl blur-lg opacity-40"></div>
+                <div className="relative w-full h-full bg-white backdrop-blur-xl rounded-2xl border border-gray-200 shadow-xl flex items-center justify-center">
+                  <p className="text-green-500 text-3xl font-bold">✓</p>
                 </div>
               </div>
-              <h2 className="text-xl font-light text-white mb-3">Спасибо за отзыв!</h2>
-              <p className="text-neutral-400 text-xs mb-8">Ваше мнение очень важно для нас</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-3">Спасибо за отзыв!</h2>
+              <p className="text-gray-500 text-xs mb-8">Ваше мнение очень важно для нас</p>
               <button
                 onClick={() => {
                   setSubmitStatus(null)
                   setCurrentView('home')
                 }}
-                className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-10 py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30"
+                className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-10 py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 font-medium"
               >
                 В меню
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-white/[0.03] rounded-3xl p-6 border border-white/5">
+            <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-white rounded-3xl p-6 border border-gray-200 shadow-xl">
               {/* Rating */}
-              <div className="pb-5 border-b border-white/5">
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-4 text-center">Оцените сервис</label>
+              <div className="pb-5 border-b border-gray-100">
+                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-4 text-center font-medium">Оцените сервис</label>
                 <div className="flex justify-center gap-3">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -372,9 +416,9 @@ function App() {
                       type="button"
                       onClick={() => setFormData({...formData, rating: star})}
                       className={`text-4xl transition-all ${
-                        formData.rating >= star 
-                          ? 'text-orange-500 scale-110' 
-                          : 'text-neutral-700 hover:text-neutral-500'
+                        formData.rating >= star
+                          ? 'text-orange-500 scale-110'
+                          : 'text-gray-300 hover:text-gray-400'
                       }`}
                     >
                       ★
@@ -382,7 +426,7 @@ function App() {
                   ))}
                 </div>
                 {formData.rating > 0 && (
-                  <p className="text-neutral-400 text-xs text-center mt-4">
+                  <p className="text-gray-500 text-xs text-center mt-4">
                     {formData.rating === 5 && 'Отлично! ⭐⭐⭐⭐⭐'}
                     {formData.rating === 4 && 'Хорошо! ⭐⭐⭐⭐'}
                     {formData.rating === 3 && 'Нормально ⭐⭐⭐'}
@@ -394,12 +438,12 @@ function App() {
 
               {/* Name */}
               <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">Ваше имя</label>
+                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваше имя</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder-gray-400"
                   placeholder="Как к вам обращаться"
                   required
                 />
@@ -407,12 +451,12 @@ function App() {
 
               {/* Phone */}
               <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">Телефон</label>
+                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-3 font-medium">Телефон</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder-gray-400"
                   placeholder="+998 90 123 45 67"
                   required
                 />
@@ -420,11 +464,11 @@ function App() {
 
               {/* Review Text */}
               <div>
-                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">Ваш отзыв</label>
+                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваш отзыв</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-orange-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder-gray-400 resize-none"
                   placeholder="Расскажите о вашей поездке..."
                   rows="5"
                   required
@@ -433,7 +477,7 @@ function App() {
 
               {/* Error Message */}
               {submitStatus === 'error' && (
-                <div className="text-red-400 text-xs py-4 bg-red-500/10 rounded-xl border border-red-500/20">
+                <div className="text-red-500 text-xs py-4 bg-red-50 rounded-xl border border-red-200">
                   Ошибка. Попробуйте ещё раз.
                 </div>
               )}
@@ -442,11 +486,104 @@ function App() {
               <button
                 type="submit"
                 disabled={submitStatus === 'loading' || !formData.rating}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {submitStatus === 'loading' ? 'Отправка...' : 'Отправить отзыв'}
               </button>
             </form>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Админ-панель
+  if (isAdminView) {
+    return (
+      <div className="min-h-screen bg-gray-50 text-gray-900 p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-200/20 rounded-full blur-3xl"></div>
+
+        <div className="max-w-2xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setIsAdminView(false)}
+              className="text-gray-600 hover:text-gray-900 transition-colors p-2 -ml-2 font-medium"
+            >
+              ← Назад
+            </button>
+            <h1 className="text-sm font-semibold text-gray-900 tracking-widest uppercase">⚙️ Админ-панель</h1>
+            <div className="w-8"></div>
+          </div>
+
+          {adminLoading ? (
+            <div className="text-center py-20 bg-white rounded-3xl border border-gray-200 shadow-xl">
+              <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-500 text-sm">Загрузка данных...</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Статистика */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">
+                  <p className="text-gray-500 text-[10px] tracking-widest uppercase mb-2">Отзывы</p>
+                  <p className="text-3xl font-bold text-gray-900">{adminData.reviews.length}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">
+                  <p className="text-gray-500 text-[10px] tracking-widest uppercase mb-2">Заказы</p>
+                  <p className="text-3xl font-bold text-gray-900">{adminData.orders.length}</p>
+                </div>
+              </div>
+
+              {/* Последние отзывы */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xl">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span>⭐</span> Последние отзывы
+                </h2>
+                {adminData.reviews.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center py-8">Нет отзывов</p>
+                ) : (
+                  <div className="space-y-4">
+                    {adminData.reviews.slice(0, 5).map((review) => (
+                      <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-orange-500 text-sm">{'⭐'.repeat(review.rating)}</span>
+                          <span className="text-gray-400 text-xs">{new Date(review.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-gray-900 font-medium text-sm mb-1">{review.customer_name}</p>
+                        <p className="text-gray-600 text-xs">{review.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Последние заказы */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xl">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span>🚕</span> Последние заказы
+                </h2>
+                {adminData.orders.length === 0 ? (
+                  <p className="text-gray-500 text-sm text-center py-8">Нет заказов</p>
+                ) : (
+                  <div className="space-y-4">
+                    {adminData.orders.slice(0, 5).map((order) => (
+                      <div key={order.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-900 font-medium text-sm">Заказ #{order.id}</span>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            order.status === 'new' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                          }`}>{order.status}</span>
+                        </div>
+                        <p className="text-gray-600 text-xs">{order.customer_name} • {order.customer_phone}</p>
+                        <p className="text-gray-500 text-xs mt-1">{order.passengers_count} пасс. • {order.comment?.slice(0, 50) || 'Без комментария'}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>

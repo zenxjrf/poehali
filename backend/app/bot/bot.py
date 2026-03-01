@@ -41,20 +41,22 @@ class Constants:
     BOT_NAME = "Поехали"
     BOT_EMOJI = "🚕"
     ROUTE = "Ташкент ↔ Фергана"
-    PRICE_PER_PERSON = 200_000
+    PRICE_PER_PERSON = 150_000
     MAIL_PRICE = 60_000
     DISPATCHER_PHONE = "+998 94 136 54 74"
-    DISPATCHER_USERNAME = "fakertop"
-    SUPPORT_USERNAME = "fakertop"
-    
+    DISPATCHER_USERNAME = "abdurasulovb"
+    SUPPORT_USERNAME = "abdurasulovb"
+
     # Тексты
     WELCOME_TEXT = (
         "👋 Здравствуйте!\n\n"
         f"Я бот сервиса {BOT_NAME} {BOT_EMOJI}\n"
         f"Помогу вам заказать такси {ROUTE}.\n\n"
+        f"💰 *Стоимость поездки:* {PRICE_PER_PERSON:,} сум\n"
+        f"📦 *Посылки:* от {MAIL_PRICE:,} сум\n\n"
         "Нажмите кнопку ниже, чтобы открыть меню:"
     )
-    
+
     CALL_BACK_TEXT = f"📞 {DISPATCHER_PHONE}"
 
 
