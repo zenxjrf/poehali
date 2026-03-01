@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 
 from app.database import engine, Base
 from app.api import api_router
-from app.bot import bot, dp, send_review_notification
+from app.bot import bot, dp, send_review_notification, send_order_notification
 from app.config import settings
 from app.models import Driver, Trip, Order, Review
 from app.schemas import ReviewCreate
@@ -88,7 +88,7 @@ async def order_webhook(order: OrderCreate):
             order_data['price'] = trip.price
             order_data['direction'] = order_data.get('direction', 'tashkent_fergana')
 
-            asyncio.create_task(send_review_notification(bot, order_data, db_order.id))
+            asyncio.create_task(send_order_notification(bot, order_data, db_order.id))
             
             return {"status": "success", "message": "Заявка принята", "order_id": db_order.id}
         finally:

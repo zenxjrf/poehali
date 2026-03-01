@@ -212,12 +212,12 @@ async def create_review(review: ReviewCreate, db: AsyncSession = Depends(get_db)
         db.add(db_review)
         await db.commit()
         await db.refresh(db_review)
-        
+
         # Отправляем уведомление администратору
-        from app.bot.bot import send_review_notification
+        from app.bot import bot
         import asyncio
-        asyncio.create_task(send_review_notification(review.model_dump(), db_review.id))
-        
+        asyncio.create_task(send_review_notification(bot, review.model_dump(), db_review.id))
+
         return db_review
     except Exception as e:
         logger.error(f"Ошибка создания отзыва: {e}")

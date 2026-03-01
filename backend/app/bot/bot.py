@@ -235,9 +235,59 @@ async def send_review_notification(
         )
         
         logger.info(f"✅ Отзыв #{review_id} отправлен")
-        
+
     except Exception as e:
         logger.error(f"❌ send_review_notification error: {e}", exc_info=True)
+
+
+async def send_order_notification(
+    bot: Bot,
+    order_data: dict,
+    order_id: int
+) -> None:
+    """
+    Отправка уведомления о новом заказе
+    """
+    try:
+        text = (
+            f"🚕 <b>НОВЫЙ ЗАКАЗ №{order_id:03d}</b>\n\n"
+            f"📍 <b>Направление:</b> {order_data.get('direction', 'Не указано')}\n"
+            f"💰 <b>Цена:</b> {order_data.get('price', 0):,} сум\n"
+            f"👤 <b>Клиент:</b> {order_data.get('customer_name', 'Аноним')}\n"
+            f"📞 <b>Телефон:</b> <code>{order_data.get('customer_phone', 'Не указан')}</code>\n"
+            f"👥 <b>Пассажиров:</b> {order_data.get('passengers_count', 1)}\n"
+            f"⏰ <b>Время звонка:</b> {order_data.get('preferred_call_time', 'Любое')}\n"
+            f"💬 <b>Комментарий:</b>\n<i>{order_data.get('comment', 'Нет')}</i>"
+        )
+
+        # Клавиатура
+        phone = order_data.get('customer_phone', '').replace(' ', '').replace('+', '')
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="📞 Позвонить",
+                        url=f"tel:{phone}"
+                    ),
+                    InlineKeyboardButton(
+                        text="💬 Написать",
+                        url=f"https://t.me/+{phone}"
+                    )
+                ]
+            ]
+        )
+
+        await bot.send_message(
+            chat_id=settings.ADMIN_CHAT_ID,
+            text=text,
+            reply_markup=keyboard,
+            parse_mode="HTML"
+        )
+
+        logger.info(f"✅ Заказ #{order_id} отправлен")
+
+    except Exception as e:
+        logger.error(f"❌ send_order_notification error: {e}", exc_info=True)
 
 
 # =============================================================================
