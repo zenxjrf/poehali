@@ -28,6 +28,15 @@ except Exception as e:
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     try:
+        # Отправляем приветственное сообщение сразу
+        await message.answer(
+            "👋 <b>Здравствуйте!</b>\n\n"
+            "Я бот сервиса <b>Поехали</b> 🚕\n"
+            "Помогу вам заказать такси из Ташкента в Фергану и обратно.\n\n"
+            "Нажмите кнопку ниже, чтобы открыть меню:",
+            parse_mode="HTML"
+        )
+        
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
@@ -78,6 +87,7 @@ async def cmd_start(message: types.Message):
         )
     except Exception as e:
         logger.error(f"Ошибка в cmd_start: {e}")
+        await message.answer("❌ Произошла ошибка. Попробуйте позже.")
 
 
 @dp.callback_query(lambda c: c.data == "call_dispatcher")
