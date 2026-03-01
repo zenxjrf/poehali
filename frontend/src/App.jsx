@@ -135,6 +135,16 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Проверка рейтинга
+    if (!formData.rating || formData.rating < 1) {
+      alert('Пожалуйста, оцените сервис (1-5 звёзд)')
+      return
+    }
+    
+    console.log('Отправка отзыва:', formData)
+    console.log('API_URL:', API_URL)
+    
     setSubmitStatus('loading')
 
     try {
@@ -144,20 +154,29 @@ function App() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...formData,
+          customer_name: formData.customer_name,
+          customer_phone: formData.customer_phone,
+          rating: formData.rating,
+          comment: formData.comment,
           trip_id: trip?.id || 1
         })
       })
 
+      console.log('Ответ сервера:', response.status)
+      
       if (response.ok) {
         setSubmitStatus('success')
         setFormData({ customer_name: '', customer_phone: '', comment: '', rating: 0 })
       } else {
+        const errorData = await response.json()
+        console.error('Ошибка сервера:', errorData)
         setSubmitStatus('error')
+        alert('Ошибка: ' + (errorData.detail || 'Попробуйте ещё раз'))
       }
     } catch (error) {
       console.error('Ошибка отправки отзыва:', error)
       setSubmitStatus('error')
+      alert('Ошибка сети: ' + error.message)
     }
   }
 
@@ -257,12 +276,16 @@ function App() {
   const [priceSaved, setPriceSaved] = useState(false)
   const [isUserAdmin, setIsUserAdmin] = useState(false)
 
-  // Проверяем админа при загрузке
+  // Проверяем админа при загрузке и когда tg готов
   useEffect(() => {
-    if (!isLoading) {
-      setIsUserAdmin(checkAdmin())
+    if (!isLoading && tg) {
+      const adminResult = checkAdmin()
+      console.log('Админ проверка завершена:', adminResult)
+      setIsUserAdmin(adminResult)
+    } else if (!isLoading && !tg) {
+      console.log('Telegram WebApp не доступен')
     }
-  }, [isLoading])
+  }, [isLoading, tg])
 
   // Preloader
   if (isLoading) {
@@ -295,17 +318,22 @@ function App() {
             <span className="text-[10px] text-gray-500 tracking-widest uppercase">Ver 2.1</span>
           </div>
           <div className="flex items-center gap-2">
-            {isUserAdmin && (
-              <button
-                onClick={() => {
+            <button
+              onClick={() => {
+                // Проверка админа при клике
+                const isAdmin = checkAdmin()
+                console.log('Кнопка админки нажата, isUserAdmin:', isAdmin)
+                if (isAdmin) {
                   setIsAdminView(!isAdminView)
                   if (!isAdminView) loadAdminData()
-                }}
-                className="text-xs text-gray-600 hover:text-orange-600 transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/70 px-3 py-1.5 rounded-full border border-gray-200"
-              >
-                ⚙️
-              </button>
-            )}
+                } else {
+                  alert('⛔ Доступ запрещён\n\nВаш Telegram ID не найден в списке администраторов.')
+                }
+              }}
+              className="text-xs text-gray-600 hover:text-orange-600 transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/70 px-3 py-1.5 rounded-full border border-gray-200"
+            >
+              ⚙️
+            </button>
             <button
               onClick={toggleLanguage}
               className="text-xs text-gray-600 hover:text-orange-600 transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/70 px-3 py-1.5 rounded-full border border-gray-200"
