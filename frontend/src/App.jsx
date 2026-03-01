@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 const DISPATCHER_USERNAME = 'abdurasulovb'
-const ADMIN_TELEGRAM_IDS = ['123456789', '987654321'] // Telegram ID администраторов
+const ADMIN_TELEGRAM_IDS = ['1698158035'] // Telegram ID администраторов
 
 // Языковые пакеты
 import ru from './locales/ru.json'
@@ -172,17 +172,47 @@ function App() {
   const loadAdminData = async () => {
     setAdminLoading(true)
     try {
-      const [reviewsRes, ordersRes] = await Promise.all([
+      const [reviewsRes, ordersRes, tripsRes] = await Promise.all([
         fetch(`${API_URL}/reviews`),
-        fetch(`${API_URL}/orders`)
+        fetch(`${API_URL}/orders`),
+        fetch(`${API_URL}/trips`)
       ])
       const reviews = await reviewsRes.json()
       const orders = await ordersRes.json()
-      setAdminData({ reviews, orders })
+      const trips = await tripsRes.json()
+      setAdminData({ reviews, orders, trips })
+      // Устанавливаем текущие цены
+      const tripData = trips.reduce((acc, t) => {
+        acc[t.direction] = t.price
+        return acc
+      }, {})
+      setPriceEdit(tripData)
     } catch (error) {
       console.error('Ошибка загрузки данных админ-панели:', error)
     }
     setAdminLoading(false)
+  }
+
+  const savePrices = async () => {
+    setPriceSaving(true)
+    try {
+      const promises = Object.entries(priceEdit).map(async ([direction, price]) => {
+        const trip = adminData.trips.find(t => t.direction === direction)
+        if (trip) {
+          await fetch(`${API_URL}/trips/${trip.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ price })
+          })
+        }
+      })
+      await Promise.all(promises)
+      setPriceSaved(true)
+      setTimeout(() => setPriceSaved(false), 3000)
+    } catch (error) {
+      console.error('Ошибка сохранения цен:', error)
+    }
+    setPriceSaving(false)
   }
 
   const toggleLanguage = () => {
@@ -214,8 +244,11 @@ function App() {
   }
 
   const [isAdminView, setIsAdminView] = useState(false)
-  const [adminData, setAdminData] = useState({ reviews: [], orders: [] })
+  const [adminData, setAdminData] = useState({ reviews: [], orders: [], trips: [] })
   const [adminLoading, setAdminLoading] = useState(false)
+  const [priceEdit, setPriceEdit] = useState({ tashkent_fergana: 150000, fergana_tashkent: 150000 })
+  const [priceSaving, setPriceSaving] = useState(false)
+  const [priceSaved, setPriceSaved] = useState(false)
 
   // Preloader
   if (isLoading) {
@@ -236,10 +269,10 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col relative overflow-hidden">
+      <div className="min-h-screen bg-stone-100 text-gray-900 flex flex-col relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-200/20 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-200/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gradient-to-b from-orange-300/25 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-gradient-to-t from-red-300/25 to-transparent rounded-full blur-3xl"></div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 relative z-10">
@@ -361,10 +394,10 @@ function App() {
   // Экран формы отзыва
   if (currentView === 'review') {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-stone-100 text-gray-900 p-6 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-300/25 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-300/25 rounded-full blur-3xl"></div>
 
         <div className="max-w-sm mx-auto relative z-10">
           {/* Header */}
@@ -500,11 +533,11 @@ function App() {
   // Админ-панель
   if (isAdminView) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-200/20 rounded-full blur-3xl"></div>
+      <div className="min-h-screen bg-stone-100 text-gray-900 p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-300/25 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-300/25 rounded-full blur-3xl"></div>
 
-        <div className="max-w-2xl mx-auto relative z-10">
+        <div className="max-w-3xl mx-auto relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <button
@@ -524,6 +557,36 @@ function App() {
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Управление ценами */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xl">
+                <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span>💰</span> Управление ценами
+                </h2>
+                <div className="space-y-4">
+                  {Object.entries(priceEdit).map(([direction, price]) => (
+                    <div key={direction} className="flex items-center gap-4">
+                      <label className="text-gray-700 text-sm font-medium w-40 capitalize">
+                        {direction === 'tashkent_fergana' ? 'Ташкент → Фергана' : 'Фергана → Ташкент'}:
+                      </label>
+                      <input
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPriceEdit({...priceEdit, [direction]: parseInt(e.target.value) || 0})}
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
+                      />
+                      <span className="text-gray-500 text-sm whitespace-nowrap">сум</span>
+                    </div>
+                  ))}
+                  <button
+                    onClick={savePrices}
+                    disabled={priceSaving}
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 font-medium"
+                  >
+                    {priceSaving ? 'Сохранение...' : priceSaved ? '✓ Сохранено!' : 'Сохранить цены'}
+                  </button>
+                </div>
+              </div>
+
               {/* Статистика */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">

@@ -129,6 +129,25 @@ async def get_trip(direction: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Ошибка сервера")
 
 
+@router.put("/trips/{trip_id}", response_model=TripResponse)
+async def update_trip(trip_id: int, trip_data: TripCreate, db: AsyncSession = Depends(get_db)):
+    try:
+        result = await db.execute(select(Trip).where(Trip.id == trip_id))
+        db_trip = result.scalar_one_or_none()
+        if not db_trip:
+            raise HTTPException(status_code=404, detail="Поездка не найдена")
+
+        db_trip.price = trip_data.price
+        await db.commit()
+        await db.refresh(db_trip)
+        return db_trip
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка обновления поездки: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка сервера")
+
+
 # Orders endpoints
 @router.post("/orders", response_model=OrderResponse)
 async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db)):
