@@ -125,7 +125,7 @@ function App() {
     // Имитация загрузки для preloader
     setTimeout(() => {
       setIsLoading(false)
-    }, 600)
+    }, 800)
   }, [])
 
   useEffect(() => {
@@ -158,7 +158,6 @@ function App() {
         }
       })
     } else {
-      // Fallback через браузер
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -246,12 +245,14 @@ function App() {
   // Preloader
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border border-amber-500/30 rounded-sm mx-auto mb-4 relative">
-            <div className="absolute inset-0 border-t border-amber-500 rounded-sm animate-spin"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+        <div className="text-center relative z-10">
+          <div className="w-16 h-16 border-2 border-purple-500/30 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 animate-pulse"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-[shimmer_2s_infinite]"></div>
           </div>
-          <p className="text-amber-500/60 text-xs tracking-[0.3em] uppercase">Poehali</p>
+          <p className="text-purple-300/60 text-xs tracking-[0.3em] uppercase font-light">Poehali</p>
         </div>
       </div>
     )
@@ -260,50 +261,64 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white flex flex-col relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5">
-          <span className="text-[10px] text-neutral-600 tracking-widest uppercase">Ver 1.5</span>
+        <div className="flex items-center justify-between px-6 py-5 relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+            <span className="text-[10px] text-neutral-500 tracking-widest uppercase">Ver 1.6</span>
+          </div>
           <button
             onClick={toggleLanguage}
-            className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors tracking-widest uppercase"
+            className="text-xs text-neutral-400 hover:text-white transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
           >
             {language === 'ru' ? 'UZ' : 'RU'}
           </button>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col justify-center px-6 pb-10">
+        <div className="flex-1 flex flex-col justify-center px-6 pb-10 relative z-10">
           <div className="max-w-sm mx-auto w-full">
             {/* Logo & Title */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl font-light text-white mb-2 tracking-tight">Поехали</h1>
-              <p className="text-neutral-600 text-xs tracking-widest uppercase mb-6">{t.app_subtitle}</p>
-              <div className="w-px h-12 bg-gradient-to-b from-amber-500/50 to-transparent mx-auto"></div>
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl blur-lg opacity-50 animate-pulse"></div>
+                <div className="relative w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-3xl border border-white/10 flex items-center justify-center">
+                  <span className="text-4xl">🚕</span>
+                </div>
+              </div>
+              <h1 className="text-4xl font-light text-white mb-3 tracking-tight bg-gradient-to-r from-white via-purple-100 to-white bg-clip-text text-transparent">Поехали</h1>
+              <p className="text-neutral-400 text-xs tracking-widest uppercase mb-6">{t.app_subtitle}</p>
+              <div className="w-px h-16 bg-gradient-to-b from-purple-500/50 via-purple-500/20 to-transparent mx-auto"></div>
             </div>
 
             {/* Price Card */}
-            <div className="mb-10">
-              <p className="text-neutral-600 text-[10px] tracking-widest uppercase text-center mb-4">{t.home.price_label}</p>
-              <div className="text-center mb-2">
-                <p className="text-5xl font-light text-white tracking-tight">{basePrice.toLocaleString()}</p>
-                <p className="text-neutral-600 text-xs mt-3">{t.home.per_person}</p>
+            <div className="backdrop-blur-xl bg-white/5 rounded-3xl p-8 mb-8 border border-white/10 shadow-2xl shadow-purple-500/10">
+              <p className="text-neutral-500 text-[10px] tracking-widest uppercase text-center mb-6">{t.home.price_label}</p>
+              <div className="text-center mb-6">
+                <p className="text-6xl font-extralight text-white tracking-tighter bg-gradient-to-b from-white to-white/70 bg-clip-text text-transparent">{basePrice.toLocaleString()}</p>
+                <p className="text-neutral-500 text-xs mt-4 uppercase tracking-wider">{t.home.per_person}</p>
               </div>
-              <div className="flex items-center justify-center gap-2 mt-6">
-                <div className="w-8 h-px bg-neutral-800"></div>
-                <p className="text-neutral-500 text-xs">{t.home.mail_label} <span className="text-neutral-300">{t.home.mail_from} {mailPrice.toLocaleString()}</span></p>
-                <div className="w-8 h-px bg-neutral-800"></div>
+              <div className="flex items-center justify-center gap-3 pt-6 border-t border-white/5">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-purple-500/30"></div>
+                <p className="text-neutral-400 text-xs">{t.home.mail_label} <span className="text-white font-medium">{t.home.mail_from} {mailPrice.toLocaleString()}</span></p>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-purple-500/30"></div>
               </div>
             </div>
 
             {/* Direction Buttons */}
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3 mb-6">
               <button
                 onClick={() => setDirection('tashkent_fergana')}
-                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase ${
+                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
                   direction === 'tashkent_fergana'
-                    ? 'bg-white text-black'
-                    : 'bg-neutral-900 text-neutral-500 hover:bg-neutral-800'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                    : 'bg-white/5 text-neutral-400 hover:bg-white/10 border border-white/10'
                 }`}
               >
                 {directionLabels.tashkent_fergana}
@@ -311,10 +326,10 @@ function App() {
 
               <button
                 onClick={() => setDirection('fergana_tashkent')}
-                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase ${
+                className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
                   direction === 'fergana_tashkent'
-                    ? 'bg-white text-black'
-                    : 'bg-neutral-900 text-neutral-500 hover:bg-neutral-800'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                    : 'bg-white/5 text-neutral-400 hover:bg-white/10 border border-white/10'
                 }`}
               >
                 {directionLabels.fergana_tashkent}
@@ -325,7 +340,7 @@ function App() {
             <div className="space-y-3">
               <button
                 onClick={() => setCurrentView('order')}
-                className="w-full bg-amber-500 text-black py-5 transition-all text-xs tracking-widest uppercase hover:bg-amber-400"
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-purple-500/40 font-medium"
               >
                 {t.buttons.leave_request}
               </button>
@@ -333,13 +348,13 @@ function App() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleCall}
-                  className="bg-neutral-900 text-white py-5 transition-all text-xs tracking-widest uppercase hover:bg-neutral-800"
+                  className="bg-white/5 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/10 border border-white/10 backdrop-blur-sm"
                 >
                   {t.buttons.call}
                 </button>
                 <button
                   onClick={handleMessage}
-                  className="bg-neutral-900 text-white py-5 transition-all text-xs tracking-widest uppercase hover:bg-neutral-800"
+                  className="bg-white/5 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/10 border border-white/10 backdrop-blur-sm"
                 >
                   {t.buttons.message}
                 </button>
@@ -349,7 +364,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-5 text-center">
+        <div className="px-6 py-5 text-center relative z-10">
           <p className="text-neutral-700 text-[9px] tracking-widest uppercase">© 2025 Poehali Taxi</p>
         </div>
       </div>
@@ -359,75 +374,82 @@ function App() {
   // Экран формы заявки
   if (currentView === 'order') {
     return (
-      <div className="min-h-screen bg-black text-white p-6">
-        <div className="max-w-sm mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white p-6 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-pink-500/10 rounded-full blur-3xl"></div>
+
+        <div className="max-w-sm mx-auto relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <button
               onClick={() => setCurrentView('home')}
-              className="text-neutral-500 hover:text-neutral-300 transition-colors"
+              className="text-neutral-400 hover:text-white transition-colors p-2 -ml-2"
             >
               ←
             </button>
             <h1 className="text-xs font-medium text-white tracking-widest uppercase">{t.order.title}</h1>
             <button
               onClick={toggleLanguage}
-              className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors tracking-widest uppercase"
+              className="text-xs text-neutral-400 hover:text-white transition-colors tracking-widest uppercase backdrop-blur-sm bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
             >
               {language === 'ru' ? 'UZ' : 'RU'}
             </button>
           </div>
 
           {submitStatus === 'success' ? (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 border border-amber-500/30 rounded-sm flex items-center justify-center mx-auto mb-6">
-                <p className="text-amber-500 text-2xl font-light">{t.success.icon}</p>
+            <div className="text-center py-20 backdrop-blur-xl bg-white/5 rounded-3xl border border-white/10">
+              <div className="w-20 h-20 mx-auto mb-6 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl blur-lg opacity-50"></div>
+                <div className="relative w-full h-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center justify-center">
+                  <p className="text-green-400 text-3xl font-light">{t.success.icon}</p>
+                </div>
               </div>
-              <h2 className="text-lg font-light text-white mb-3">{t.success.title}</h2>
-              <p className="text-neutral-600 text-xs mb-8">{t.success.message}</p>
+              <h2 className="text-xl font-light text-white mb-3">{t.success.title}</h2>
+              <p className="text-neutral-400 text-xs mb-8">{t.success.message}</p>
               <button
                 onClick={() => {
                   setSubmitStatus(null)
                   setCurrentView('home')
                 }}
-                className="bg-amber-500 text-black px-10 py-4 transition-all text-xs tracking-widest uppercase hover:bg-amber-400"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-10 py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-purple-500/40"
               >
                 {t.buttons.return_to_menu}
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-white/5 rounded-3xl p-6 border border-white/10">
               {/* Direction Info */}
-              <div className="pb-5 border-b border-neutral-900">
-                <p className="text-neutral-600 text-[10px] tracking-widest uppercase mb-2">{t.order.direction}</p>
-                <p className="text-white text-sm font-light">{directionLabels[direction]}</p>
+              <div className="pb-5 border-b border-white/5">
+                <p className="text-neutral-500 text-[10px] tracking-widest uppercase mb-2">{t.order.direction}</p>
+                <p className="text-white text-sm font-light bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl px-4 py-3 border border-purple-500/20">{directionLabels[direction]}</p>
               </div>
 
               {/* Location */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-neutral-600 text-[10px] tracking-widest uppercase">{t.order.location}</label>
+                  <label className="text-neutral-500 text-[10px] tracking-widest uppercase">{t.order.location}</label>
                   <button
                     type="button"
                     onClick={getLocation}
-                    className="text-amber-500 hover:text-amber-400 transition-colors text-xs"
+                    className={`transition-colors text-xs ${formData.location ? 'text-green-400' : 'text-purple-400 hover:text-purple-300'}`}
                   >
                     {formData.location ? t.buttons.location_added : t.buttons.get_location}
                   </button>
                 </div>
                 {formData.location && (
-                  <p className="text-neutral-500 text-xs truncate">📍 Геолокация добавлена</p>
+                  <p className="text-neutral-400 text-xs truncate bg-white/5 rounded-xl px-4 py-3 border border-white/5">📍 Геолокация добавлена</p>
                 )}
               </div>
 
               {/* Name */}
               <div>
-                <label className="block text-neutral-600 text-[10px] tracking-widest uppercase mb-3">{t.order.name}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.name}</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full bg-neutral-900 border border-neutral-800 px-4 py-4 text-white text-sm focus:outline-none focus:border-amber-500/50 transition-colors placeholder-neutral-700"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
                   placeholder={t.order.name_placeholder}
                   required
                 />
@@ -435,12 +457,12 @@ function App() {
 
               {/* Phone */}
               <div>
-                <label className="block text-neutral-600 text-[10px] tracking-widest uppercase mb-3">{t.order.phone}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.phone}</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full bg-neutral-900 border border-neutral-800 px-4 py-4 text-white text-sm focus:outline-none focus:border-amber-500/50 transition-colors placeholder-neutral-700"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
                   placeholder={t.order.phone_placeholder}
                   required
                 />
@@ -448,37 +470,37 @@ function App() {
 
               {/* Call Time */}
               <div>
-                <label className="block text-neutral-600 text-[10px] tracking-widest uppercase mb-3">{t.order.call_time}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.call_time}</label>
                 <input
                   type="text"
                   value={formData.preferred_call_time}
                   onChange={(e) => setFormData({...formData, preferred_call_time: e.target.value})}
-                  className="w-full bg-neutral-900 border border-neutral-800 px-4 py-4 text-white text-sm focus:outline-none focus:border-amber-500/50 transition-colors placeholder-neutral-700"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm"
                   placeholder={t.order.call_time_placeholder}
                 />
               </div>
 
               {/* Passengers */}
               <div>
-                <label className="block text-neutral-600 text-[10px] tracking-widest uppercase mb-3">{t.order.passengers}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.passengers}</label>
                 <select
                   value={formData.passengers_count}
                   onChange={(e) => setFormData({...formData, passengers_count: parseInt(e.target.value)})}
-                  className="w-full bg-neutral-900 border border-neutral-800 px-4 py-4 text-white text-sm focus:outline-none focus:border-amber-500/50 transition-colors"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors backdrop-blur-sm"
                 >
                   {[1, 2, 3, 4, 5, 6].map(num => (
-                    <option key={num} value={num} className="bg-black">{num}</option>
+                    <option key={num} value={num} className="bg-slate-900 text-white">{num}</option>
                   ))}
                 </select>
               </div>
 
               {/* Comment */}
               <div>
-                <label className="block text-neutral-600 text-[10px] tracking-widest uppercase mb-3">{t.order.comment}</label>
+                <label className="block text-neutral-500 text-[10px] tracking-widest uppercase mb-3">{t.order.comment}</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full bg-neutral-900 border border-neutral-800 px-4 py-4 text-white text-sm focus:outline-none focus:border-amber-500/50 transition-colors placeholder-neutral-700 resize-none"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors placeholder-neutral-600 backdrop-blur-sm resize-none"
                   placeholder={t.order.comment_placeholder}
                   rows="3"
                 />
@@ -486,7 +508,7 @@ function App() {
 
               {/* Error Message */}
               {submitStatus === 'error' && (
-                <div className="text-red-500 text-xs py-4">
+                <div className="text-red-400 text-xs py-4 bg-red-500/10 rounded-xl border border-red-500/20">
                   Ошибка. Попробуйте ещё раз.
                 </div>
               )}
@@ -495,7 +517,7 @@ function App() {
               <button
                 type="submit"
                 disabled={submitStatus === 'loading'}
-                className="w-full bg-amber-500 text-black py-5 transition-all text-xs tracking-widest uppercase hover:bg-amber-400 disabled:opacity-50 mt-8"
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-purple-500/40 disabled:opacity-50 font-medium"
               >
                 {submitStatus === 'loading' ? t.buttons.sending : t.buttons.send_request}
               </button>
