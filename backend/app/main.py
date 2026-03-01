@@ -62,9 +62,38 @@ app.include_router(api_router)
 async def order_webhook(order: OrderCreate):
     """Webhook для получения заказов из Web App"""
     try:
-        # Отправка уведомления администратору
-        asyncio.create_task(send_order_notification(order.model_dump()))
-        return {"status": "success", "message": "Заявка принята"}
+        # Создаём заказ в БД
+        from sqlalchemy import select
+        from app.models import Trip, Order
+        from app.database import get_db
+        
+        # Получаем сессию БД
+        db_session = next(get_db())
+        
+        try:
+            # Проверка поездки
+            trip_result = await db_session.execute(select(Trip).where(Trip.id == order.trip_id))
+            trip = trip_result.scalar_one_or_none()
+            if not trip:
+                return {"status": "error", "message": "Поездка не найдена"}
+            
+            # Создаём заказ
+            db_order = Order(**order.model_dump())
+            db_session.add(db_order)
+            await db_session.commit()
+            await db_session.refresh(db_order)
+            
+            # Отправляем уведомление с номером заказа
+            order_data = order.model_dump()
+            order_data['price'] = trip.price
+            order_data['direction'] = order_data.get('direction', 'tashkent_fergana')
+            
+            asyncio.create_task(send_order_notification(order_data, db_order.id))
+            
+            return {"status": "success", "message": "Заявка принята", "order_id": db_order.id}
+        finally:
+            await db_session.close()
+            
     except Exception as e:
         logger.error(f"Ошибка обработки заявки: {e}")
         return {"status": "error", "message": str(e)}

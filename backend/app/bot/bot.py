@@ -5,11 +5,15 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import LabeledPrice
 
 from app.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Счётчик заявок
+order_counter = 0
 
 # Инициализация бота и диспетчера
 try:
@@ -84,62 +88,91 @@ async def process_call(callback: types.CallbackQuery):
         logger.error(f"Ошибка в process_call: {e}")
 
 
-async def send_order_notification(order_data: dict):
-    """Отправка уведомления о новом заказе в чат администратора"""
+async def send_order_notification(order_data: dict, order_id: int = None):
+    """
+    Отправка уведомления о новом заказе в чат администратора
+    Формат: 🔔 Поступила заявка №XXX
+    """
+    global order_counter
+    
     try:
+        # Увеличиваем счётчик
+        order_counter += 1
+        order_number = order_counter if order_id is None else order_id
+        
         direction_labels = {
             'tashkent_fergana': 'Ташкент → Фергана',
             'fergana_tashkent': 'Фергана → Ташкент'
         }
         
-        # Формируем сообщение
-        text = (
-            "🔔 <b>НОВАЯ ЗАЯВКА!</b>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━\n\n"
+        # Короткое уведомление
+        short_text = (
+            f"🔔 <b>Поступила заявка №{order_number:03d}</b>\n\n"
+            f"👤 {order_data.get('customer_name', 'Клиент')}\n"
+            f"📞 <code>{order_data.get('customer_phone', '')}</code>\n"
+            f"🚕 {direction_labels.get(order_data.get('direction', ''), 'Направление')}\n"
+            f"💰 {order_data.get('price', 0):,} сум"
+        )
+        
+        # Полная информация
+        full_text = (
+            f"🔔 <b>ПОСТУПИЛА ЗАЯВКА №{order_number:03d}</b>\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"👤 <b>Клиент:</b> {order_data.get('customer_name', 'Не указано')}\n"
             f"📞 <b>Телефон:</b> <code>{order_data.get('customer_phone', 'Не указан')}</code>\n"
             f"🚕 <b>Направление:</b> {direction_labels.get(order_data.get('direction', 'Не указано'))}\n"
             f"⏰ <b>Удобное время:</b> {order_data.get('preferred_call_time', 'Не указано')}\n"
             f"👥 <b>Пассажиры:</b> {order_data.get('passengers_count', 1)} чел.\n"
-            f"💬 <b>Комментарий:</b> {order_data.get('comment', 'Нет')}\n"
+            f"💬 <b>Комментарий:</b> {order_data.get('comment', 'Нет') or 'Нет'}\n"
             f"💰 <b>Цена:</b> {order_data.get('price', 0):,} сум\n"
         )
         
         # Добавляем геолокацию если есть
         location = order_data.get('location')
         if location:
-            text += f"\n📍 <b>Геолокация:</b> <a href='{location}'>Открыть на карте</a>\n"
+            full_text += f"\n📍 <b>Геолокация:</b> <a href='{location}'>Открыть на карте</a>\n"
         
-        text += "\n━━━━━━━━━━━━━━━━━━━━\n"
-        text += f"🕒 <b>Время:</b> {order_data.get('created_at', 'Только что')}"
+        full_text += "\n━━━━━━━━━━━━━━━━━━━━\n"
+        full_text += f"🕒 <b>Время:</b> {order_data.get('created_at', 'Только что')}"
         
         # Кнопки действий
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     InlineKeyboardButton(
-                        text="📞 Позвонить клиенту",
+                        text="📞 Позвонить",
                         url=f"tel:{order_data.get('customer_phone', '')}"
+                    ),
+                    InlineKeyboardButton(
+                        text="💬 Написать",
+                        url=f"https://t.me/+{order_data.get('customer_phone', '').replace('+', '').replace(' ', '')}"
                     )
                 ],
                 [
                     InlineKeyboardButton(
-                        text="💬 Написать клиенту",
-                        url=f"https://t.me/+{order_data.get('customer_phone', '').replace('+', '').replace(' ', '')}"
+                        text="📍 Геолокация",
+                        url=location if location else "https://maps.google.com"
                     )
                 ]
             ]
         )
         
-        # Отправляем уведомление
+        # Отправляем короткое уведомление
         await bot.send_message(
             chat_id=settings.ADMIN_CHAT_ID,
-            text=text,
+            text=short_text,
+            parse_mode="HTML"
+        )
+        
+        # Отправляем полное уведомление с кнопками
+        await bot.send_message(
+            chat_id=settings.ADMIN_CHAT_ID,
+            text=full_text,
             reply_markup=keyboard,
             parse_mode="HTML",
             disable_web_page_preview=True
         )
         
-        logger.info(f"✅ Уведомление отправлено администратору {settings.ADMIN_CHAT_ID}")
+        logger.info(f"✅ Уведомление №{order_number} отправлено администратору {settings.ADMIN_CHAT_ID}")
     except Exception as e:
         logger.error(f"❌ Ошибка отправки уведомления: {e}")
