@@ -73,6 +73,18 @@ function App() {
     }
   })
 
+  // Форма заявки
+  const [orderForm, setOrderForm] = useState({
+    customer_name: '',
+    customer_phone: '',
+    preferred_call_time: '',
+    passengers_count: 1,
+    comment: '',
+    location: ''
+  })
+  const [orderSubmitting, setOrderSubmitting] = useState(false)
+  const [locationLoading, setLocationLoading] = useState(false)
+
   // Объединяем с fallback
   const langData = translations[language] || {}
   const t = new Proxy(defaultTranslations, {
@@ -191,6 +203,94 @@ function App() {
 
   const handleMessage = () => {
     window.open(`https://t.me/${DISPATCHER_USERNAME}`, '_blank', 'noopener,noreferrer')
+  }
+
+  // Получение геолокации
+  const getLocation = () => {
+    setLocationLoading(true)
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords
+          // Создаём ссылку на Google Maps
+          const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
+          setOrderForm({...orderForm, location: locationUrl})
+          setLocationLoading(false)
+          alert('📍 Геолокация добавлена!')
+        },
+        (error) => {
+          console.error('Ошибка геолокации:', error)
+          setLocationLoading(false)
+          alert('❌ Не удалось получить геолокацию. Разрешите доступ к геопозиции.')
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      )
+    } else {
+      setLocationLoading(false)
+      alert('❌ Ваш браузер не поддерживает геолокацию')
+    }
+  }
+
+  // Отправка заявки
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault()
+    
+    console.log('=== ОТПРАВКА ЗАЯВКИ ===')
+    console.log('Данные формы:', orderForm)
+    console.log('API_URL:', API_URL)
+    
+    if (!orderForm.customer_name || !orderForm.customer_phone) {
+      alert('Пожалуйста, заполните имя и телефон')
+      return
+    }
+    
+    setOrderSubmitting(true)
+
+    try {
+      const response = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customer_name: orderForm.customer_name,
+          customer_phone: orderForm.customer_phone,
+          preferred_call_time: orderForm.preferred_call_time || 'Любое время',
+          passengers_count: orderForm.passengers_count,
+          comment: orderForm.comment || 'Нет',
+          location: orderForm.location || 'Не указана',
+          trip_id: trip?.id || 1,
+          driver_id: null
+        })
+      })
+
+      console.log('Ответ сервера:', response.status)
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Заказ создан:', data)
+        setOrderSubmitting(false)
+        setOrderForm({
+          customer_name: '',
+          customer_phone: '',
+          preferred_call_time: '',
+          passengers_count: 1,
+          comment: '',
+          location: ''
+        })
+        alert('✅ Заявка успешно отправлена!\n\nМы перезвоним вам в ближайшее время.')
+        setCurrentView('home')
+      } else {
+        const errorData = await response.json()
+        console.error('Ошибка сервера:', errorData)
+        setOrderSubmitting(false)
+        alert('❌ Ошибка: ' + (errorData.detail || 'Попробуйте ещё раз'))
+      }
+    } catch (error) {
+      console.error('Ошибка сети:', error)
+      setOrderSubmitting(false)
+      alert('❌ Ошибка сети: ' + error.message)
+    }
   }
 
   const loadAdminData = async () => {
@@ -425,10 +525,17 @@ function App() {
             {/* Action Buttons */}
             <div className="space-y-3">
               <button
+                onClick={() => setCurrentView('order')}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-blue-600/30 font-medium"
+              >
+                🚕 Оставить заявку
+              </button>
+              
+              <button
                 onClick={() => setCurrentView('review')}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 font-medium"
               >
-                ⭐ {t.buttons.leave_request}
+                ⭐ Оставить отзыв
               </button>
 
               <div className="grid grid-cols-2 gap-3">
@@ -591,6 +698,160 @@ function App() {
               </button>
             </form>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  // Экран формы заявки
+  if (currentView === 'order') {
+    return (
+      <div className="min-h-screen bg-stone-400 text-gray-900 p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-600/40 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-cyan-600/40 rounded-full blur-3xl"></div>
+
+        <div className="max-w-sm mx-auto relative z-10">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setCurrentView('home')}
+              className="text-gray-700 hover:text-gray-900 transition-colors p-2 -ml-2 font-medium"
+            >
+              ← Назад
+            </button>
+            <h1 className="text-xs font-semibold text-gray-900 tracking-widest uppercase">🚕 Заявка на поездку</h1>
+            <div className="w-8"></div>
+          </div>
+
+          <form onSubmit={handleOrderSubmit} className="space-y-4 backdrop-blur-xl bg-stone-200 rounded-3xl p-6 border border-stone-300 shadow-xl">
+            {/* Направление */}
+            <div className="bg-stone-100 rounded-xl p-4 border border-stone-300">
+              <p className="text-gray-500 text-[10px] tracking-widest uppercase mb-2 font-medium">Направление</p>
+              <p className="text-gray-900 font-semibold">{directionLabels[direction]}</p>
+              <p className="text-gray-600 text-sm mt-1">Цена: <span className="font-bold text-gray-900">{basePrice.toLocaleString()} сум</span></p>
+            </div>
+
+            {/* Имя */}
+            <div>
+              <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваше имя *</label>
+              <input
+                type="text"
+                value={orderForm.customer_name}
+                onChange={(e) => setOrderForm({...orderForm, customer_name: e.target.value})}
+                className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all placeholder-gray-500"
+                placeholder="Как к вам обращаться"
+                required
+              />
+            </div>
+
+            {/* Телефон */}
+            <div>
+              <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Номер телефона *</label>
+              <input
+                type="tel"
+                value={orderForm.customer_phone}
+                onChange={(e) => setOrderForm({...orderForm, customer_phone: e.target.value})}
+                className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all placeholder-gray-500"
+                placeholder="+998 90 123 45 67"
+                required
+              />
+            </div>
+
+            {/* Время для звонка */}
+            <div>
+              <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Удобное время для звонка</label>
+              <input
+                type="text"
+                value={orderForm.preferred_call_time}
+                onChange={(e) => setOrderForm({...orderForm, preferred_call_time: e.target.value})}
+                className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all placeholder-gray-500"
+                placeholder="Например: с 9:00 до 18:00"
+              />
+            </div>
+
+            {/* Пассажиры */}
+            <div>
+              <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Количество пассажиров</label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setOrderForm({...orderForm, passengers_count: Math.max(1, orderForm.passengers_count - 1)})}
+                  className="w-12 h-12 bg-stone-100 border border-stone-300 rounded-xl text-gray-700 text-xl font-bold hover:bg-stone-200 transition-colors"
+                >
+                  −
+                </button>
+                <span className="text-2xl font-bold text-gray-900 w-12 text-center">{orderForm.passengers_count}</span>
+                <button
+                  type="button"
+                  onClick={() => setOrderForm({...orderForm, passengers_count: Math.min(10, orderForm.passengers_count + 1)})}
+                  className="w-12 h-12 bg-stone-100 border border-stone-300 rounded-xl text-gray-700 text-xl font-bold hover:bg-stone-200 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Геолокация */}
+            <div>
+              <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Местоположение</label>
+              <button
+                type="button"
+                onClick={getLocation}
+                disabled={locationLoading}
+                className={`w-full py-4 rounded-xl border-2 border-dashed transition-all font-medium ${
+                  orderForm.location
+                    ? 'bg-green-100 border-green-400 text-green-700'
+                    : 'bg-stone-100 border-stone-400 text-gray-600 hover:border-blue-500 hover:text-blue-600'
+                }`}
+              >
+                {locationLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+                    Определение...
+                  </span>
+                ) : orderForm.location ? (
+                  <span className="flex items-center justify-center gap-2">
+                    📍 Геолокация добавлена
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    📍 Добавить геолокацию
+                  </span>
+                )}
+              </button>
+              {orderForm.location && (
+                <a
+                  href={orderForm.location}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mt-2 text-xs text-blue-600 hover:underline text-center"
+                >
+                  🔗 Открыть на карте
+                </a>
+              )}
+            </div>
+
+            {/* Комментарий */}
+            <div>
+              <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Комментарий (необязательно)</label>
+              <textarea
+                value={orderForm.comment}
+                onChange={(e) => setOrderForm({...orderForm, comment: e.target.value})}
+                className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-all placeholder-gray-500 resize-none"
+                placeholder="Пожелания к поездке..."
+                rows="3"
+              />
+            </div>
+
+            {/* Кнопка отправки */}
+            <button
+              type="submit"
+              disabled={orderSubmitting}
+              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-blue-600/30 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm"
+            >
+              {orderSubmitting ? '⏳ Отправка...' : '✅ Отправить заявку'}
+            </button>
+          </form>
         </div>
       </div>
     )
