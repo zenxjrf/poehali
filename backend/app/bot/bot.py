@@ -1,139 +1,224 @@
+"""
+Telegram бот для сервиса Poehali
+Оптимизированная версия v2.2
+"""
 import asyncio
 import logging
-import sys
+from contextlib import asynccontextmanager
+from typing import Optional
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
-from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import (
+    WebAppInfo, 
+    InlineKeyboardMarkup, 
+    InlineKeyboardButton,
+    LabeledPrice
+)
 
 from app.config import settings
 
-# Настраиваем логирование
+# =============================================================================
+# КОНФИГУРАЦИЯ И ЛОГИРОВАНИЕ
+# =============================================================================
+
+# Оптимизированное логирование
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    level=logging.INFO,  # DEBUG только для отладки
+    format='%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
 
-# Счётчик заявок
-order_counter = 0
 
-# Инициализация бота и диспетчера
-logger.info("=" * 50)
-logger.info("🔧 Инициализация бота...")
-logger.info(f"BOT_TOKEN: {settings.BOT_TOKEN[:20]}...")
-logger.info(f"WEB_APP_URL: {settings.WEB_APP_URL}")
-logger.info(f"ADMIN_CHAT_ID: {settings.ADMIN_CHAT_ID}")
+# =============================================================================
+# КОНСТАНТЫ
+# =============================================================================
 
-try:
-    bot = Bot(token=settings.BOT_TOKEN)
-    dp = Dispatcher(storage=MemoryStorage())
-    logger.info("✅ Бот успешно инициализирован!")
-except Exception as e:
-    logger.error(f"❌ Ошибка инициализации бота: {e}")
-    raise
-
-
-def get_main_keyboard():
-    """Создаёт главную клавиатуру"""
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="🚕 Открыть меню",
-                    web_app=WebAppInfo(url=settings.WEB_APP_URL)
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="📞 Позвонить",
-                    callback_data="call_dispatcher"
-                ),
-                InlineKeyboardButton(
-                    text="💬 Написать",
-                    url="https://t.me/fakertop"
-                )
-            ]
-        ]
+class Constants:
+    """Константы бота для централизованного управления"""
+    BOT_NAME = "Поехали"
+    BOT_EMOJI = "🚕"
+    ROUTE = "Ташкент ↔ Фергана"
+    PRICE_PER_PERSON = 200_000
+    MAIL_PRICE = 60_000
+    DISPATCHER_PHONE = "+998 94 136 54 74"
+    DISPATCHER_USERNAME = "fakertop"
+    SUPPORT_USERNAME = "fakertop"
+    
+    # Тексты
+    WELCOME_TEXT = (
+        "👋 Здравствуйте!\n\n"
+        f"Я бот сервиса {BOT_NAME} {BOT_EMOJI}\n"
+        f"Помогу вам заказать такси {ROUTE}.\n\n"
+        "Нажмите кнопку ниже, чтобы открыть меню:"
     )
+    
+    CALL_BACK_TEXT = f"📞 {DISPATCHER_PHONE}"
 
+
+# =============================================================================
+# КЛАВИША (КЭШИРОВАНИЕ)
+# =============================================================================
+
+class Keyboards:
+    """Фабрика клавиатур с кэшированием"""
+    
+    _main_keyboard: Optional[InlineKeyboardMarkup] = None
+    
+    @classmethod
+    def get_main_keyboard(cls) -> InlineKeyboardMarkup:
+        """Возвращает кэшированную главную клавиатуру"""
+        if cls._main_keyboard is None:
+            cls._main_keyboard = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text="🚕 Открыть меню",
+                            web_app=WebAppInfo(url=settings.WEB_APP_URL)
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text="📞 Позвонить",
+                            callback_data="call_dispatcher"
+                        ),
+                        InlineKeyboardButton(
+                            text="💬 Написать",
+                            url=f"https://t.me/{Constants.SUPPORT_USERNAME}"
+                        )
+                    ]
+                ]
+            )
+            logger.debug("Главная клавиатура создана")
+        return cls._main_keyboard
+    
+    @classmethod
+    def get_review_keyboard(cls, review_id: int) -> InlineKeyboardMarkup:
+        """Создаёт клавиатуру для отзыва (не кэшируется)"""
+        return InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="📞 Позвонить",
+                        url=f"tel:{review_id}"
+                    )
+                ]
+            ]
+        )
+
+
+# =============================================================================
+# ИНИЦИАЛИЗАЦИЯ
+# =============================================================================
+
+@asynccontextmanager
+async def bot_lifespan(bot: Bot):
+    """Управление жизненным циклом бота"""
+    logger.info("=" * 60)
+    logger.info("🔧 Инициализация бота...")
+    logger.info(f"BOT_TOKEN: {settings.BOT_TOKEN[:20]}...")
+    logger.info(f"WEB_APP_URL: {settings.WEB_APP_URL}")
+    logger.info(f"ADMIN_CHAT_ID: {settings.ADMIN_CHAT_ID}")
+    logger.info("=" * 60)
+    yield
+    logger.info("👋 Завершение работы бота...")
+
+
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
+
+
+# =============================================================================
+# ХЕНДЛЕРЫ
+# =============================================================================
 
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    """Обработчик команды /start"""
+async def cmd_start(message: types.Message) -> None:
+    """
+    Обработчик команды /start
+    Оптимизация: кэшированная клавиатура, минимум логов
+    """
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name
-    logger.info("=" * 50)
-    logger.info(f"📨 Команда /start от пользователя {user_id} (@{username})")
+    
+    logger.info(f"📨 /start от {user_id} (@{username})")
     
     try:
-        keyboard = get_main_keyboard()
-        
-        logger.info(f"📤 Отправка сообщения с кнопками пользователю {user_id}")
-        
-        # Отправляем сообщение с кнопками
-        response = await message.answer(
-            text=(
-                "👋 Здравствуйте!\n\n"
-                "Я бот сервиса Поехали 🚕\n"
-                "Помогу вам заказать такси из Ташкента в Фергану и обратно.\n\n"
-                "Нажмите кнопку ниже, чтобы открыть меню:"
-            ),
-            reply_markup=keyboard
+        await message.answer(
+            text=Constants.WELCOME_TEXT,
+            reply_markup=Keyboards.get_main_keyboard()
         )
-        
-        logger.info(f"✅ Сообщение успешно отправлено! Message ID: {response.message_id}")
-        logger.info("=" * 50)
+        logger.debug(f"✅ Ответ отправлен {user_id}")
         
     except Exception as e:
-        logger.error(f"❌ Ошибка в cmd_start: {e}", exc_info=True)
-        logger.error(f"Тип ошибки: {type(e).__name__}")
+        logger.error(f"❌ /start error for {user_id}: {type(e).__name__} - {e}")
         await message.answer("❌ Произошла ошибка. Попробуйте позже.")
 
 
 @dp.callback_query(lambda c: c.data == "call_dispatcher")
-async def process_call(callback: types.CallbackQuery):
-    """Обработчик нажатия на кнопку 'Позвонить'"""
+async def process_call(callback: types.CallbackQuery) -> None:
+    """
+    Обработчик кнопки 'Позвонить'
+    Оптимизация: простой ответ без лишних логов
+    """
     try:
-        logger.info(f"📞 Нажата кнопка 'Позвонить' от {callback.from_user.id}")
-        await callback.answer("📞 +998 94 136 54 74", show_alert=True)
-        logger.info("✅ Ответ отправлен")
+        await callback.answer(Constants.CALL_BACK_TEXT, show_alert=True)
     except Exception as e:
-        logger.error(f"❌ Ошибка в process_call: {e}", exc_info=True)
+        logger.error(f"❌ Callback error: {e}")
 
 
-async def send_review_notification(review_data: dict, review_id: int):
-    """Отправка уведомления о новом отзыве в чат администратора"""
+# =============================================================================
+# УВЕДОМЛЕНИЯ
+# =============================================================================
+
+async def send_review_notification(
+    bot: Bot,
+    review_data: dict,
+    review_id: int
+) -> None:
+    """
+    Отправка уведомления о новом отзыве
+    Оптимизация: один запрос вместо двух, валидация данных
+    """
     try:
-        # Звёзды
-        stars = '⭐' * review_data.get('rating', 0)
+        rating = review_data.get('rating', 0)
+        
+        # Валидация
+        if not 1 <= rating <= 5:
+            logger.warning(f"Некорректный рейтинг: {rating}")
+            rating = 5
+        
+        # Формирование текста
+        stars_map = {
+            5: '⭐⭐⭐⭐⭐ Отлично!',
+            4: '⭐⭐⭐⭐ Хорошо',
+            3: '⭐⭐⭐ Нормально',
+            2: '⭐⭐ Плохо',
+            1: '⭐ Ужасно'
+        }
         
         text = (
             f"⭐ <b>НОВЫЙ ОТЗЫВ №{review_id:03d}</b>\n\n"
-            f"{'⭐⭐⭐⭐⭐' if review_data.get('rating') == 5 else '⭐⭐⭐⭐' if review_data.get('rating') == 4 else '⭐⭐⭐' if review_data.get('rating') == 3 else '⭐⭐' if review_data.get('rating') == 2 else '⭐'}\n\n"
-            f"👤 <b>Клиент:</b> {review_data.get('customer_name', 'Не указано')}\n"
+            f"{stars_map.get(rating, '⭐⭐⭐⭐⭐')}\n\n"
+            f"👤 <b>Клиент:</b> {review_data.get('customer_name', 'Аноним')}\n"
             f"📞 <b>Телефон:</b> <code>{review_data.get('customer_phone', 'Не указан')}</code>\n"
-            f"💬 <b>Отзыв:</b>\n{review_data.get('comment', 'Нет')}\n\n"
-            f"🕒 <b>Время:</b> {review_data.get('created_at', 'Только что')}"
+            f"💬 <b>Отзыв:</b>\n<i>{review_data.get('comment', 'Нет')}</i>"
         )
         
-        # Кнопки действий
+        # Клавиатура
+        phone = review_data.get('customer_phone', '').replace(' ', '').replace('+', '')
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     InlineKeyboardButton(
                         text="📞 Позвонить",
-                        url=f"tel:{review_data.get('customer_phone', '')}"
-                    )
-                ],
-                [
+                        url=f"tel:{phone}"
+                    ),
                     InlineKeyboardButton(
                         text="💬 Написать",
-                        url=f"https://t.me/+{review_data.get('customer_phone', '').replace('+', '').replace(' ', '')}"
+                        url=f"https://t.me/+{phone}"
                     )
                 ]
             ]
@@ -146,6 +231,33 @@ async def send_review_notification(review_data: dict, review_id: int):
             parse_mode="HTML"
         )
         
-        logger.info(f"✅ Отзыв №{review_id} отправлен администратору")
+        logger.info(f"✅ Отзыв #{review_id} отправлен")
+        
     except Exception as e:
-        logger.error(f"❌ Ошибка отправки отзыва: {e}", exc_info=True)
+        logger.error(f"❌ send_review_notification error: {e}", exc_info=True)
+
+
+# =============================================================================
+# ЗАПУСК
+# =============================================================================
+
+async def run_bot():
+    """Запуск бота с обработкой ошибок"""
+    bot = Bot(token=settings.BOT_TOKEN)
+    
+    try:
+        async with bot_lifespan(bot):
+            await bot.delete_webhook()
+            await dp.start_polling(bot)
+    except KeyboardInterrupt:
+        logger.info("🛑 Остановка по Ctrl+C")
+    except Exception as e:
+        logger.critical(f"💥 Критическая ошибка: {e}", exc_info=True)
+        raise
+    finally:
+        await bot.session.close()
+        logger.info("👋 Бот остановлен")
+
+
+if __name__ == "__main__":
+    asyncio.run(run_bot())
