@@ -234,7 +234,7 @@ function App() {
   const mailPrice = 60000
 
   // Проверка прав администратора
-  const isAdmin = () => {
+  const checkAdmin = () => {
     try {
       // Получаем Telegram User ID
       const tgUserId = tg?.initDataUnsafe?.user?.id?.toString()
@@ -255,6 +255,14 @@ function App() {
   const [priceEdit, setPriceEdit] = useState({ tashkent_fergana: 150000, fergana_tashkent: 150000 })
   const [priceSaving, setPriceSaving] = useState(false)
   const [priceSaved, setPriceSaved] = useState(false)
+  const [isUserAdmin, setIsUserAdmin] = useState(false)
+
+  // Проверяем админа при загрузке
+  useEffect(() => {
+    if (!isLoading) {
+      setIsUserAdmin(checkAdmin())
+    }
+  }, [isLoading])
 
   // Preloader
   if (isLoading) {
@@ -287,7 +295,7 @@ function App() {
             <span className="text-[10px] text-gray-500 tracking-widest uppercase">Ver 2.1</span>
           </div>
           <div className="flex items-center gap-2">
-            {isAdmin() && (
+            {isUserAdmin && (
               <button
                 onClick={() => {
                   setIsAdminView(!isAdminView)
@@ -400,10 +408,10 @@ function App() {
   // Экран формы отзыва
   if (currentView === 'review') {
     return (
-      <div className="min-h-screen bg-gray-300 text-gray-900 p-6 relative overflow-hidden">
+      <div className="min-h-screen bg-stone-400 text-gray-900 p-6 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-500/35 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-500/35 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-600/40 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-600/40 rounded-full blur-3xl"></div>
 
         <div className="max-w-sm mx-auto relative z-10">
           {/* Header */}
@@ -424,10 +432,10 @@ function App() {
           </div>
 
           {submitStatus === 'success' ? (
-            <div className="text-center py-20 backdrop-blur-xl bg-white rounded-3xl border border-gray-200 shadow-xl">
+            <div className="text-center py-20 backdrop-blur-xl bg-stone-200 rounded-3xl border border-stone-300 shadow-xl">
               <div className="w-20 h-20 mx-auto mb-6 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-400 rounded-2xl blur-lg opacity-40"></div>
-                <div className="relative w-full h-full bg-white backdrop-blur-xl rounded-2xl border border-gray-200 shadow-xl flex items-center justify-center">
+                <div className="relative w-full h-full bg-stone-100 backdrop-blur-xl rounded-2xl border border-stone-300 shadow-xl flex items-center justify-center">
                   <p className="text-green-500 text-3xl font-bold">✓</p>
                 </div>
               </div>
@@ -444,10 +452,10 @@ function App() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-white rounded-3xl p-6 border border-gray-200 shadow-xl">
+            <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-xl bg-stone-200 rounded-3xl p-6 border border-stone-300 shadow-xl">
               {/* Rating */}
-              <div className="pb-5 border-b border-gray-100">
-                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-4 text-center font-medium">Оцените сервис</label>
+              <div className="pb-5 border-b border-stone-300">
+                <label className="block text-gray-600 text-[10px] tracking-widest uppercase mb-4 text-center font-medium">Оцените сервис</label>
                 <div className="flex justify-center gap-3">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -456,8 +464,8 @@ function App() {
                       onClick={() => setFormData({...formData, rating: star})}
                       className={`text-4xl transition-all ${
                         formData.rating >= star
-                          ? 'text-orange-500 scale-110'
-                          : 'text-gray-300 hover:text-gray-400'
+                          ? 'text-orange-600 scale-110'
+                          : 'text-gray-400 hover:text-gray-500'
                       }`}
                     >
                       ★
@@ -465,7 +473,7 @@ function App() {
                   ))}
                 </div>
                 {formData.rating > 0 && (
-                  <p className="text-gray-500 text-xs text-center mt-4">
+                  <p className="text-gray-600 text-xs text-center mt-4">
                     {formData.rating === 5 && 'Отлично! ⭐⭐⭐⭐⭐'}
                     {formData.rating === 4 && 'Хорошо! ⭐⭐⭐⭐'}
                     {formData.rating === 3 && 'Нормально ⭐⭐⭐'}
@@ -477,12 +485,12 @@ function App() {
 
               {/* Name */}
               <div>
-                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваше имя</label>
+                <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваше имя</label>
                 <input
                   type="text"
                   value={formData.customer_name}
                   onChange={(e) => setFormData({...formData, customer_name: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder-gray-400"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-600/20 transition-all placeholder-gray-500"
                   placeholder="Как к вам обращаться"
                   required
                 />
@@ -490,12 +498,12 @@ function App() {
 
               {/* Phone */}
               <div>
-                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-3 font-medium">Телефон</label>
+                <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Телефон</label>
                 <input
                   type="tel"
                   value={formData.customer_phone}
                   onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder-gray-400"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-600/20 transition-all placeholder-gray-500"
                   placeholder="+998 90 123 45 67"
                   required
                 />
@@ -503,11 +511,11 @@ function App() {
 
               {/* Review Text */}
               <div>
-                <label className="block text-gray-500 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваш отзыв</label>
+                <label className="block text-gray-700 text-[10px] tracking-widest uppercase mb-3 font-medium">Ваш отзыв</label>
                 <textarea
                   value={formData.comment}
                   onChange={(e) => setFormData({...formData, comment: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder-gray-400 resize-none"
+                  className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-4 text-gray-900 text-sm focus:outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-600/20 transition-all placeholder-gray-500 resize-none"
                   placeholder="Расскажите о вашей поездке..."
                   rows="5"
                   required
@@ -516,7 +524,7 @@ function App() {
 
               {/* Error Message */}
               {submitStatus === 'error' && (
-                <div className="text-red-500 text-xs py-4 bg-red-50 rounded-xl border border-red-200">
+                <div className="text-red-600 text-xs py-4 bg-red-100 rounded-xl border border-red-300">
                   Ошибка. Попробуйте ещё раз.
                 </div>
               )}
@@ -525,7 +533,7 @@ function App() {
               <button
                 type="submit"
                 disabled={submitStatus === 'loading' || !formData.rating}
-                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {submitStatus === 'loading' ? 'Отправка...' : 'Отправить отзыв'}
               </button>
@@ -539,9 +547,9 @@ function App() {
   // Админ-панель
   if (isAdminView) {
     return (
-      <div className="min-h-screen bg-gray-300 text-gray-900 p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-500/35 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-500/35 rounded-full blur-3xl"></div>
+      <div className="min-h-screen bg-stone-400 text-gray-900 p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-orange-600/40 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-600/40 rounded-full blur-3xl"></div>
 
         <div className="max-w-3xl mx-auto relative z-10">
           {/* Header */}
@@ -564,29 +572,29 @@ function App() {
           ) : (
             <div className="space-y-6">
               {/* Управление ценами */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xl">
+              <div className="bg-stone-200 rounded-2xl p-6 border border-stone-300 shadow-xl">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span>💰</span> Управление ценами
                 </h2>
                 <div className="space-y-4">
                   {Object.entries(priceEdit).map(([direction, price]) => (
                     <div key={direction} className="flex items-center gap-4">
-                      <label className="text-gray-700 text-sm font-medium w-40 capitalize">
+                      <label className="text-gray-800 text-sm font-medium w-40 capitalize">
                         {direction === 'tashkent_fergana' ? 'Ташкент → Фергана' : 'Фергана → Ташкент'}:
                       </label>
                       <input
                         type="number"
                         value={price}
                         onChange={(e) => setPriceEdit({...priceEdit, [direction]: parseInt(e.target.value) || 0})}
-                        className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
+                        className="flex-1 bg-stone-100 border border-stone-300 rounded-xl px-4 py-3 text-gray-900 text-sm focus:outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-600/20 transition-all"
                       />
-                      <span className="text-gray-500 text-sm whitespace-nowrap">сум</span>
+                      <span className="text-gray-600 text-sm whitespace-nowrap">сум</span>
                     </div>
                   ))}
                   <button
                     onClick={savePrices}
                     disabled={priceSaving}
-                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-500/30 disabled:opacity-50 font-medium"
+                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-orange-600/30 disabled:opacity-50 font-medium"
                   >
                     {priceSaving ? 'Сохранение...' : priceSaved ? '✓ Сохранено!' : 'Сохранить цены'}
                   </button>
@@ -595,33 +603,33 @@ function App() {
 
               {/* Статистика */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">
-                  <p className="text-gray-500 text-[10px] tracking-widest uppercase mb-2">Отзывы</p>
+                <div className="bg-stone-200 rounded-2xl p-6 border border-stone-300 shadow-lg">
+                  <p className="text-gray-600 text-[10px] tracking-widest uppercase mb-2">Отзывы</p>
                   <p className="text-3xl font-bold text-gray-900">{adminData.reviews.length}</p>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg">
-                  <p className="text-gray-500 text-[10px] tracking-widest uppercase mb-2">Заказы</p>
+                <div className="bg-stone-200 rounded-2xl p-6 border border-stone-300 shadow-lg">
+                  <p className="text-gray-600 text-[10px] tracking-widest uppercase mb-2">Заказы</p>
                   <p className="text-3xl font-bold text-gray-900">{adminData.orders.length}</p>
                 </div>
               </div>
 
               {/* Последние отзывы */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xl">
+              <div className="bg-stone-200 rounded-2xl p-6 border border-stone-300 shadow-xl">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span>⭐</span> Последние отзывы
                 </h2>
                 {adminData.reviews.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-8">Нет отзывов</p>
+                  <p className="text-gray-600 text-sm text-center py-8">Нет отзывов</p>
                 ) : (
                   <div className="space-y-4">
                     {adminData.reviews.slice(0, 5).map((review) => (
-                      <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                      <div key={review.id} className="border-b border-stone-300 pb-4 last:border-0 last:pb-0">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-orange-500 text-sm">{'⭐'.repeat(review.rating)}</span>
-                          <span className="text-gray-400 text-xs">{new Date(review.created_at).toLocaleDateString()}</span>
+                          <span className="text-orange-600 text-sm">{'⭐'.repeat(review.rating)}</span>
+                          <span className="text-gray-500 text-xs">{new Date(review.created_at).toLocaleDateString()}</span>
                         </div>
                         <p className="text-gray-900 font-medium text-sm mb-1">{review.customer_name}</p>
-                        <p className="text-gray-600 text-xs">{review.comment}</p>
+                        <p className="text-gray-700 text-xs">{review.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -629,24 +637,24 @@ function App() {
               </div>
 
               {/* Последние заказы */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xl">
+              <div className="bg-stone-200 rounded-2xl p-6 border border-stone-300 shadow-xl">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <span>🚕</span> Последние заказы
                 </h2>
                 {adminData.orders.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-8">Нет заказов</p>
+                  <p className="text-gray-600 text-sm text-center py-8">Нет заказов</p>
                 ) : (
                   <div className="space-y-4">
                     {adminData.orders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                      <div key={order.id} className="border-b border-stone-300 pb-4 last:border-0 last:pb-0">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-gray-900 font-medium text-sm">Заказ #{order.id}</span>
                           <span className={`text-xs px-2 py-1 rounded-full ${
-                            order.status === 'new' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                            order.status === 'new' ? 'bg-green-200 text-green-800' : 'bg-stone-100 text-gray-700'
                           }`}>{order.status}</span>
                         </div>
-                        <p className="text-gray-600 text-xs">{order.customer_name} • {order.customer_phone}</p>
-                        <p className="text-gray-500 text-xs mt-1">{order.passengers_count} пасс. • {order.comment?.slice(0, 50) || 'Без комментария'}</p>
+                        <p className="text-gray-700 text-xs">{order.customer_name} • {order.customer_phone}</p>
+                        <p className="text-gray-600 text-xs mt-1">{order.passengers_count} пасс. • {order.comment?.slice(0, 50) || 'Без комментария'}</p>
                       </div>
                     ))}
                   </div>
