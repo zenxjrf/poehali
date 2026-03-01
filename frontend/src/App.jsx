@@ -149,9 +149,13 @@ function App() {
   }
 
   const getLocation = () => {
+    console.log('📍 Запрос геолокации...')
+    
     // Пробуем через Telegram WebApp
     if (tg && tg.LocationManager) {
+      console.log('Используем Telegram LocationManager')
       tg.LocationManager.getData((location) => {
+        console.log('Telegram location:', location)
         if (location && location.latitude && location.longitude) {
           const locationUrl = `https://maps.google.com/?q=${location.latitude},${location.longitude}`
           setFormData(prev => ({ ...prev, location: locationUrl }))
@@ -163,8 +167,10 @@ function App() {
     } 
     // Fallback через браузер
     else if (navigator.geolocation) {
+      console.log('Используем браузерную геолокацию')
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log('Browser location:', position.coords)
           const { latitude, longitude } = position.coords
           const locationUrl = `https://maps.google.com/?q=${latitude},${longitude}`
           setFormData(prev => ({ ...prev, location: locationUrl }))
@@ -173,20 +179,27 @@ function App() {
         },
         (error) => {
           console.error('Ошибка геолокации:', error)
-          const errorMsg = error.code === 1 
-            ? '❌ Доступ к геолокации запрещён' 
-            : '❌ Не удалось получить геолокацию'
+          let errorMsg = '❌ Не удалось получить геолокацию'
+          if (error.code === 1) {
+            errorMsg = '❌ Доступ к геолокации запрещён. Разрешите в настройках браузера.'
+          } else if (error.code === 2) {
+            errorMsg = '❌ Позиция недоступна'
+          } else if (error.code === 3) {
+            errorMsg = '❌ Превышено время ожидания'
+          }
+          console.error(errorMsg)
           if (tg) tg.showAlert(errorMsg)
           else alert(errorMsg)
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 15000,
           maximumAge: 0
         }
       )
     } else {
       const msg = '❌ Геолокация не поддерживается браузером'
+      console.error(msg)
       if (tg) tg.showAlert(msg)
       else alert(msg)
     }
