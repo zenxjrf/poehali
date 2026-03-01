@@ -5,7 +5,6 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import LabeledPrice
 
 from app.config import settings
 
@@ -27,7 +26,9 @@ except Exception as e:
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
+    """Обработчик команды /start"""
     try:
+        # Создаём клавиатуру с кнопками
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
@@ -49,13 +50,19 @@ async def cmd_start(message: types.Message):
             ]
         )
         
+        # Отправляем сообщение с кнопками
         await message.answer(
-            "👋 Здравствуйте!\n\n"
-            "Я бот сервиса Поехали 🚕\n"
-            "Помогу вам заказать такси из Ташкента в Фергану и обратно.\n\n"
-            "Нажмите кнопку ниже, чтобы открыть меню:",
+            text=(
+                "👋 Здравствуйте!\n\n"
+                "Я бот сервиса Поехали 🚕\n"
+                "Помогу вам заказать такси из Ташкента в Фергану и обратно.\n\n"
+                "Нажмите кнопку ниже, чтобы открыть меню:"
+            ),
             reply_markup=keyboard
         )
+        
+        logger.info(f"Бот ответил пользователю {message.from_user.id}")
+        
     except Exception as e:
         logger.error(f"Ошибка в cmd_start: {e}")
         await message.answer("❌ Произошла ошибка. Попробуйте позже.")
@@ -63,6 +70,7 @@ async def cmd_start(message: types.Message):
 
 @dp.callback_query(lambda c: c.data == "call_dispatcher")
 async def process_call(callback: types.CallbackQuery):
+    """Обработчик нажатия на кнопку 'Позвонить'"""
     try:
         await callback.answer("📞 +998 94 136 54 74", show_alert=True)
     except Exception as e:

@@ -245,14 +245,14 @@ function App() {
   // Preloader
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+      <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-black to-purple-900/10"></div>
         <div className="text-center relative z-10">
-          <div className="w-16 h-16 border-2 border-purple-500/30 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm">
+          <div className="w-16 h-16 border-2 border-purple-500/30 rounded-2xl mx-auto mb-4 relative overflow-hidden backdrop-blur-sm bg-black/50">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 animate-pulse"></div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-[shimmer_2s_infinite]"></div>
           </div>
-          <p className="text-purple-300/60 text-xs tracking-[0.3em] uppercase font-light">Poehali</p>
+          <p className="text-purple-400/40 text-xs tracking-[0.3em] uppercase font-light">Poehali</p>
         </div>
       </div>
     )
@@ -261,11 +261,10 @@ function App() {
   // Главный экран
   if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white flex flex-col relative overflow-hidden">
+      <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-pink-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-pink-600/5 rounded-full blur-3xl"></div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 relative z-10">
@@ -298,16 +297,16 @@ function App() {
             </div>
 
             {/* Price Card */}
-            <div className="backdrop-blur-xl bg-white/5 rounded-3xl p-8 mb-8 border border-white/10 shadow-2xl shadow-purple-500/10">
-              <p className="text-neutral-500 text-[10px] tracking-widest uppercase text-center mb-6">{t.home.price_label}</p>
+            <div className="backdrop-blur-xl bg-white/[0.03] rounded-3xl p-8 mb-8 border border-white/5 shadow-2xl shadow-purple-500/5">
+              <p className="text-neutral-600 text-[10px] tracking-widest uppercase text-center mb-6">{t.home.price_label}</p>
               <div className="text-center mb-6">
-                <p className="text-6xl font-extralight text-white tracking-tighter bg-gradient-to-b from-white to-white/70 bg-clip-text text-transparent">{basePrice.toLocaleString()}</p>
-                <p className="text-neutral-500 text-xs mt-4 uppercase tracking-wider">{t.home.per_person}</p>
+                <p className="text-6xl font-extralight text-white tracking-tighter">{basePrice.toLocaleString()}</p>
+                <p className="text-neutral-600 text-xs mt-4 uppercase tracking-wider">{t.home.per_person}</p>
               </div>
               <div className="flex items-center justify-center gap-3 pt-6 border-t border-white/5">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-purple-500/30"></div>
-                <p className="text-neutral-400 text-xs">{t.home.mail_label} <span className="text-white font-medium">{t.home.mail_from} {mailPrice.toLocaleString()}</span></p>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-purple-500/30"></div>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-purple-500/20"></div>
+                <p className="text-neutral-500 text-xs">{t.home.mail_label} <span className="text-neutral-300 font-medium">{t.home.mail_from} {mailPrice.toLocaleString()}</span></p>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-purple-500/20"></div>
               </div>
             </div>
 
@@ -317,8 +316,8 @@ function App() {
                 onClick={() => setDirection('tashkent_fergana')}
                 className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
                   direction === 'tashkent_fergana'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-                    : 'bg-white/5 text-neutral-400 hover:bg-white/10 border border-white/10'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/20'
+                    : 'bg-white/[0.02] text-neutral-500 hover:bg-white/[0.05] border border-white/5'
                 }`}
               >
                 {directionLabels.tashkent_fergana}
@@ -328,8 +327,8 @@ function App() {
                 onClick={() => setDirection('fergana_tashkent')}
                 className={`w-full py-5 px-6 transition-all text-xs tracking-widest uppercase rounded-2xl backdrop-blur-sm ${
                   direction === 'fergana_tashkent'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-                    : 'bg-white/5 text-neutral-400 hover:bg-white/10 border border-white/10'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/20'
+                    : 'bg-white/[0.02] text-neutral-500 hover:bg-white/[0.05] border border-white/5'
                 }`}
               >
                 {directionLabels.fergana_tashkent}
@@ -340,7 +339,7 @@ function App() {
             <div className="space-y-3">
               <button
                 onClick={() => setCurrentView('order')}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-purple-500/40 font-medium"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:shadow-lg hover:shadow-purple-600/30 font-medium"
               >
                 {t.buttons.leave_request}
               </button>
@@ -348,13 +347,13 @@ function App() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleCall}
-                  className="bg-white/5 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/10 border border-white/10 backdrop-blur-sm"
+                  className="bg-white/[0.02] text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/[0.05] border border-white/5 backdrop-blur-sm"
                 >
                   {t.buttons.call}
                 </button>
                 <button
                   onClick={handleMessage}
-                  className="bg-white/5 text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/10 border border-white/10 backdrop-blur-sm"
+                  className="bg-white/[0.02] text-white py-5 rounded-2xl transition-all text-xs tracking-widest uppercase hover:bg-white/[0.05] border border-white/5 backdrop-blur-sm"
                 >
                   {t.buttons.message}
                 </button>
