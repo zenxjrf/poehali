@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-from .review import ReviewBase, ReviewCreate, ReviewResponse
+from backend.app.schemas.review import ReviewBase, ReviewCreate, ReviewResponse
 
 __all__ = ['DriverBase', 'DriverCreate', 'DriverUpdate', 'DriverResponse',
            'TripBase', 'TripCreate', 'TripResponse',

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
         description="Admin chat ID for notifications"
     )
     DATABASE_URL: str = Field(
-        default="sqlite+aiosqlite:///poehali.db",
+        default="",
         description="Database URL"
     )
     WEB_APP_URL: str = Field(
@@ -41,9 +41,28 @@ class Settings(BaseSettings):
 try:
     settings = Settings()
     logger.info("✅ Settings loaded successfully")
+    
+    # Если DATABASE_URL пустой, используем SQLite с абсолютным путём
+    if not settings.DATABASE_URL:
+        # Для Vercel serverless используем /tmp директорию
+        if os.getenv("VERCEL"):
+            settings.DATABASE_URL = "sqlite+aiosqlite:///tmp/poehali.db"
+            logger.info("Using SQLite in /tmp for Vercel")
+        else:
+            db_path = BASE_DIR / "poehali.db"
+            settings.DATABASE_URL = f"sqlite+aiosqlite:///{db_path}"
+            logger.info(f"Using local SQLite: {db_path}")
+    
     logger.info(f"DATABASE_URL: {settings.DATABASE_URL}")
     logger.info(f"WEB_APP_URL: {settings.WEB_APP_URL}")
 except Exception as e:
     logger.error(f"❌ Settings loading error: {e}")
     # Создаём settings с дефолтными значениями
-    settings = Settings()
+    if os.getenv("VERCEL"):
+        _db_url = "sqlite+aiosqlite:///tmp/poehali.db"
+    else:
+        _db_url = f"sqlite+aiosqlite:///{BASE_DIR}/poehali.db"
+    
+    settings = Settings(
+        DATABASE_URL=_db_url
+    )

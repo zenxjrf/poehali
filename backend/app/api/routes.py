@@ -6,15 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
 
-from app.database import get_db
-from app.models import Driver, Trip, Order, Review
-from app.schemas import (
+from backend.app.database import get_db
+from backend.app.models import Driver, Trip, Order, Review
+from backend.app.schemas import (
     DriverResponse, DriverCreate, DriverUpdate,
     TripResponse, TripCreate,
     OrderCreate, OrderResponse, OrderUpdate,
     ReviewCreate, ReviewResponse
 )
-from app.bot import bot, send_review_notification, init_bot
+from backend.app.bot import bot, send_review_notification, init_bot
 
 logger = logging.getLogger(__name__)
 

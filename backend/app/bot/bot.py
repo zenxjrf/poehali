@@ -11,13 +11,13 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (
-    WebAppInfo, 
-    InlineKeyboardMarkup, 
+    WebAppInfo,
+    InlineKeyboardMarkup,
     InlineKeyboardButton,
     LabeledPrice
 )
 
-from app.config import settings
+from backend.app.config import settings
 
 # =============================================================================
 # КОНФИГУРАЦИЯ И ЛОГИРОВАНИЕ
