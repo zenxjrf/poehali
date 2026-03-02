@@ -122,17 +122,21 @@ storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
 
-@asynccontextmanager
-async def bot_lifespan(bot: Bot):
-    """Управление жизненным циклом бота"""
-    logger.info("=" * 60)
-    logger.info("🔧 Инициализация бота...")
-    logger.info(f"BOT_TOKEN: {settings.BOT_TOKEN[:20]}...")
-    logger.info(f"WEB_APP_URL: {settings.WEB_APP_URL}")
-    logger.info(f"ADMIN_CHAT_ID: {settings.ADMIN_CHAT_ID}")
-    logger.info("=" * 60)
-    yield
-    logger.info("👋 Завершение работы бота...")
+async def init_bot():
+    """Инициализация бота для serverless (Vercel)"""
+    global bot
+    if bot is None:
+        bot = Bot(token=settings.BOT_TOKEN)
+        logger.info("✅ Бот инициализирован для serverless режима")
+    return bot
+
+
+async def close_bot():
+    """Закрытие сессии бота"""
+    global bot
+    if bot:
+        await bot.session.close()
+        logger.info("👋 Сессия бота закрыта")
 
 
 # =============================================================================
@@ -293,26 +297,15 @@ async def send_order_notification(
 
 
 # =============================================================================
-# ЗАПУСК
+# SERVERLESS EXPORTS
 # =============================================================================
 
-async def run_bot():
-    """Запуск бота с обработкой ошибок"""
-    bot = Bot(token=settings.BOT_TOKEN)
-    
-    try:
-        async with bot_lifespan(bot):
-            await bot.delete_webhook()
-            await dp.start_polling(bot)
-    except KeyboardInterrupt:
-        logger.info("🛑 Остановка по Ctrl+C")
-    except Exception as e:
-        logger.critical(f"💥 Критическая ошибка: {e}", exc_info=True)
-        raise
-    finally:
-        await bot.session.close()
-        logger.info("👋 Бот остановлен")
-
-
-if __name__ == "__main__":
-    asyncio.run(run_bot())
+# Экспортируем функции для использования в main.py
+__all__ = [
+    'bot',
+    'dp',
+    'init_bot',
+    'close_bot',
+    'send_review_notification',
+    'send_order_notification'
+]

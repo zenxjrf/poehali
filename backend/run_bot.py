@@ -1,6 +1,7 @@
 """
 Запуск Telegram бота отдельно от FastAPI
-Используйте этот скрипт для запуска бота на отдельном сервере
+Используйте этот скрипт для локальной разработки с polling
+Для Vercel используется webhook через main.py
 """
 import asyncio
 import logging
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Получаем настройки из переменных окружения
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8606991774:AAGoHuOW3OCpN9n03U0gxKv5eDB27br60OQ')
 WEB_APP_URL = os.getenv('WEB_APP_URL', 'http://localhost:5173')
-DISPATCHER_USERNAME = os.getenv('DISPATCHER_USERNAME', 'fakertop')
+DISPATCHER_USERNAME = os.getenv('DISPATCHER_USERNAME', 'abdurasulovb')
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
@@ -92,8 +93,12 @@ async def process_call(callback: types.CallbackQuery):
 
 
 async def main():
-    """Запуск бота"""
-    logger.info("🤖 Запуск Telegram бота...")
+    """Запуск бота с polling (локальная разработка)"""
+    logger.info("🤖 Запуск Telegram бота (polling режим)...")
+    logger.info(f"WEB_APP_URL: {WEB_APP_URL}")
+    logger.info(f"DISPATCHER_USERNAME: @{DISPATCHER_USERNAME}")
+    
+    # Для локальной разработки используем polling
     await bot.delete_webhook()
     await dp.start_polling(bot)
 
@@ -105,3 +110,4 @@ if __name__ == "__main__":
         logger.info("👋 Бот остановлен")
     finally:
         await bot.session.close()
+        logger.info("✅ Сессия закрыта")

@@ -10,11 +10,11 @@ from app.database import get_db
 from app.models import Driver, Trip, Order, Review
 from app.schemas import (
     DriverResponse, DriverCreate, DriverUpdate,
-    TripResponse,
+    TripResponse, TripCreate,
     OrderCreate, OrderResponse, OrderUpdate,
     ReviewCreate, ReviewResponse
 )
-from app.bot import bot, send_review_notification
+from app.bot import bot, send_review_notification, init_bot
 
 logger = logging.getLogger(__name__)
 
@@ -235,6 +235,9 @@ async def create_review(review: ReviewCreate, db: AsyncSession = Depends(get_db)
         await db.refresh(db_review)
 
         # Отправляем уведомление администратору
+        # Инициализируем бота если нужно (для serverless)
+        if bot is None:
+            await init_bot()
         asyncio.create_task(send_review_notification(bot, review.model_dump(), db_review.id))
 
         return db_review
