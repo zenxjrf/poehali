@@ -24,6 +24,9 @@ async function checkApiAvailability() {
   }
 }
 
+// ВРЕМЕННО: Всегда считаем API доступным (для тестирования без backend)
+const API_AVAILABLE_BY_DEFAULT = true
+
 // Языковые пакеты
 import ru from './locales/ru.json'
 import uz from './locales/uz.json'
@@ -106,7 +109,8 @@ function App() {
   useEffect(() => {
     const checkApi = async () => {
       setCheckingApi(true)
-      const available = await checkApiAvailability()
+      // ВРЕМЕННО: Используем значение по умолчанию для тестирования
+      const available = API_AVAILABLE_BY_DEFAULT ? true : await checkApiAvailability()
       console.log('=== API AVAILABILITY ===')
       console.log('API available:', available)
       setApiAvailable(available)
