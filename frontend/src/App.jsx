@@ -33,7 +33,7 @@ const defaultTranslations = {
     comfort_title: '🛋️ Комфортно',
     comfort_text: 'Современные автомобили с кондиционером. Опытные водители.',
     reliability_title: '🔒 Надёжно',
-    reliability_text: 'Работаем с 2020 года. Более 10,000 довольных клиентов.',
+    reliability_text: 'Работаем с 2015 года. Много довольных клиентов.',
     price_title: '💰 Фиксированная цена',
     price_text: 'Никаких сюрпризов. Цена известна заранее.'
   }
@@ -371,7 +371,7 @@ function App() {
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 mb-2"> Надёжно</h3>
                   <p className="text-gray-600 text-xs leading-relaxed">
-                    Работаем с 2020 года. Более 10,000 довольных клиентов. 
+                    Работаем с 2015 года. Много довольных клиентов.
                     Гарантированная подача автомобиля в назначенное время.
                   </p>
                 </div>
@@ -396,14 +396,10 @@ function App() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-3 mb-8">
+          <div className="grid grid-cols-2 gap-3 mb-8">
             <div className="backdrop-blur-xl bg-white rounded-2xl p-4 border border-gray-200 shadow-lg text-center">
-              <p className="text-2xl font-bold text-orange-600 mb-1">4+</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Года</p>
-            </div>
-            <div className="backdrop-blur-xl bg-white rounded-2xl p-4 border border-gray-200 shadow-lg text-center">
-              <p className="text-2xl font-bold text-orange-600 mb-1">10K+</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Клиентов</p>
+              <p className="text-2xl font-bold text-orange-600 mb-1">9+</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider">Лет</p>
             </div>
             <div className="backdrop-blur-xl bg-white rounded-2xl p-4 border border-gray-200 shadow-lg text-center">
               <p className="text-2xl font-bold text-orange-600 mb-1">30 мин</p>
