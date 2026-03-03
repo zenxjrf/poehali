@@ -22,12 +22,40 @@ async def lifespan(app: FastAPI):
         # Создание таблиц БД
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("✅ База данных инициализирована")
+        logger.info("✅ Таблицы БД созданы")
+        
+        # Инициализация данных
+        from sqlalchemy import select
+        from app.models import Trip, Driver
+        from app.database import async_session_maker
+        
+        async with async_session_maker() as session:
+            # Проверка направлений
+            result = await session.execute(select(Trip))
+            trips = result.scalars().all()
+            
+            if not trips:
+                logger.info("📍 Создаю направления...")
+                trip1 = Trip(direction="tashkent_fergana", price=150000)
+                trip2 = Trip(direction="fergana_tashkent", price=150000)
+                session.add_all([trip1, trip2])
+                
+                # Создаю тестовых водителей
+                drivers_data = [
+                    Driver(name="Алишер", car_brand="Chevrolet", car_model="Malibu", car_year=2022, experience_years=5, description="Опытный водитель", has_air_conditioning=True, has_large_trunk=True, pets_allowed=False),
+                    Driver(name="Рустам", car_brand="Chevrolet", car_model="Tracker", car_year=2023, experience_years=7, description="Комфортные поездки", has_air_conditioning=True, has_large_trunk=True, pets_allowed=True),
+                    Driver(name="Сардор", car_brand="BYD", car_model="Han", car_year=2024, experience_years=4, description="Электромобиль", has_air_conditioning=True, has_large_trunk=True, pets_allowed=False),
+                ]
+                session.add_all(drivers_data)
+                await session.commit()
+                logger.info("✅ Данные инициализированы")
+            else:
+                logger.info("✅ Данные уже существуют")
+                
     except Exception as e:
         logger.error(f"❌ Ошибка инициализации БД: {e}")
 
     # Vercel serverless: не запускаем polling, только webhook
-    # Бот работает через webhook, который обрабатывается в /webhook/telegram
     logger.info("✅ Serverless режим: бот работает через webhook")
 
     yield
