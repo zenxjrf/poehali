@@ -1,0 +1,35 @@
+{
+  "buildCommand": "pip install --break-system-packages -r requirements.txt",
+  "outputDirectory": ".vercel/cache",
+  "installCommand": "pip install --break-system-packages -r requirements.txt",
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/webhook/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/health",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.11",
+    "BOT_TOKEN": "8606991774:AAGoHuOW3OCpN9n03U0gxKv5eDB27br60OQ",
+    "ADMIN_CHAT_ID": "-5247892173",
+    "DATABASE_URL": "sqlite+aiosqlite:///tmp/poehali.db",
+    "WEB_APP_URL": "https://poehali.vercel.app"
+  }
+}
