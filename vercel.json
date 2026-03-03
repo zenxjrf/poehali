@@ -3,22 +3,8 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm install",
   "framework": "vite",
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/frontend/dist/index.html"
-    },
-    {
-      "src": "/webhook/(.*)",
-      "dest": "/frontend/dist/index.html"
-    },
-    {
-      "src": "/health",
-      "dest": "/frontend/dist/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/dist/$1"
-    }
-  ]
+  "env": {
+    "VITE_API_URL": "http://localhost:8000/api/v1",
+    "VITE_DISPATCHER_USERNAME": "abdurasulovb"
+  }
 }
