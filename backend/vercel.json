@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app/main.py"
+    }
+  ],
+  "env": {
+    "BOT_TOKEN": "8606991774:AAGoHuOW3OCpN9n03U0gxKv5eDB27br60OQ",
+    "ADMIN_CHAT_ID": "-5247892173",
+    "WEB_APP_URL": "https://poehali-psi.vercel.app",
+    "VERCEL": "1"
+  }
+}
