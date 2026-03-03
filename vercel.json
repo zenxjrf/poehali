@@ -1,36 +1,24 @@
 {
-  "buildCommand": "pip install --break-system-packages -r requirements.txt && cd frontend && npm install && npm run build",
+  "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "pip install --break-system-packages -r requirements.txt",
+  "installCommand": "cd frontend && npm install",
   "framework": "vite",
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 60
-    }
-  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "api/index.py"
+      "dest": "/frontend/dist/index.html"
     },
     {
       "src": "/webhook/(.*)",
-      "dest": "api/index.py"
+      "dest": "/frontend/dist/index.html"
     },
     {
       "src": "/health",
-      "dest": "api/index.py"
+      "dest": "/frontend/dist/index.html"
     },
     {
       "src": "/(.*)",
       "dest": "frontend/dist/$1"
     }
-  ],
-  "env": {
-    "PYTHON_VERSION": "3.11.0",
-    "BOT_TOKEN": "8606991774:AAGoHuOW3OCpN9n03U0gxKv5eDB27br60OQ",
-    "ADMIN_CHAT_ID": "-5247892173",
-    "DATABASE_URL": "sqlite+aiosqlite:///tmp/poehali.db",
-    "WEB_APP_URL": "https://poehali-psi.vercel.app"
-  }
+  ]
 }
