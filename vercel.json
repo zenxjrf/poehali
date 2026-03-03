@@ -32,8 +32,5 @@
     "ADMIN_CHAT_ID": "-5247892173",
     "DATABASE_URL": "sqlite+aiosqlite:///tmp/poehali.db",
     "WEB_APP_URL": "https://poehali-psi.vercel.app"
-  },
-  "deploymentProtection": {
-    "vercelAuthentication": false
   }
 }
