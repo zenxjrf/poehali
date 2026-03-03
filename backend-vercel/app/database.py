@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 try:
     # Определение диалекта
     db_url = settings.DATABASE_URL
-    
+
     # Обработка относительных путей для SQLite
     if db_url.startswith("sqlite+aiosqlite:///") and not db_url.startswith("sqlite+aiosqlite:////"):
         # Относительный путь - преобразуем в абсолютный
@@ -20,20 +20,22 @@ try:
         if not os.path.isabs(db_path):
             # Для Vercel используем /tmp
             if os.getenv("VERCEL"):
-                db_path = f"/tmp/{db_path}"
+                db_path = f"/tmp/poehali.db"
             else:
                 # Локально используем директорию backend
                 backend_dir = Path(__file__).parent.parent.parent
                 db_path = str(backend_dir / db_path)
             db_url = f"sqlite+aiosqlite:///{db_path}"
             logger.info(f"Using absolute SQLite path: {db_path}")
-    
+
     if "sqlite" in db_url:
         # SQLite для serverless (Vercel)
         engine = create_async_engine(
             db_url,
             echo=False,
-            connect_args={"check_same_thread": False}
+            connect_args={"check_same_thread": False},
+            # Serverless: нет pool для SQLite
+            poolclass=None,
         )
         logger.info("✅ SQLite engine created for serverless")
     elif "postgresql" in db_url:
