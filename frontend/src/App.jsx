@@ -61,6 +61,9 @@ function App() {
     }
   })
 
+  // Получаем текущий язык
+  const t = translations[language] || {}
+
   const tg = typeof window !== 'undefined' && window.Telegram ? window.Telegram.WebApp : null
 
   useEffect(() => {
