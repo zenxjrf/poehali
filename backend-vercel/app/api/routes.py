@@ -28,9 +28,9 @@ TRIPS_DB = [
 ]
 
 DRIVERS_DB = [
-    {"id": 1, "name": "Алишер", "photo_url": None, "car_brand": "Chevrolet", "car_model": "Malibu", "car_year": 2022, "experience_years": 5, "description": "Опытный водитель", "is_active": True, "has_air_conditioning": True, "has_large_trunk": True, "pets_allowed": False},
-    {"id": 2, "name": "Рустам", "photo_url": None, "car_brand": "Chevrolet", "car_model": "Tracker", "car_year": 2023, "experience_years": 7, "description": "Комфортные поездки", "is_active": True, "has_air_conditioning": True, "has_large_trunk": True, "pets_allowed": True},
-    {"id": 3, "name": "Сардор", "photo_url": None, "car_brand": "BYD", "car_model": "Han", "car_year": 2024, "experience_years": 4, "description": "Электромобиль", "is_active": True, "has_air_conditioning": True, "has_large_trunk": True, "pets_allowed": False}
+    {"id": 1, "name": "Алишер", "photo_url": None, "car_brand": "Chevrolet", "car_model": "Malibu", "car_year": 2022, "experience_years": 5, "description": "Опытный водитель", "is_active": True, "has_air_conditioning": True, "has_large_trunk": True, "pets_allowed": False, "created_at": "2026-03-03T00:00:00"},
+    {"id": 2, "name": "Рустам", "photo_url": None, "car_brand": "Chevrolet", "car_model": "Tracker", "car_year": 2023, "experience_years": 7, "description": "Комфортные поездки", "is_active": True, "has_air_conditioning": True, "has_large_trunk": True, "pets_allowed": True, "created_at": "2026-03-03T00:00:00"},
+    {"id": 3, "name": "Сардор", "photo_url": None, "car_brand": "BYD", "car_model": "Han", "car_year": 2024, "experience_years": 4, "description": "Электромобиль", "is_active": True, "has_air_conditioning": True, "has_large_trunk": True, "pets_allowed": False, "created_at": "2026-03-03T00:00:00"}
 ]
 
 ORDERS_DB = []
