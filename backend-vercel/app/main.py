@@ -6,11 +6,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from backend.app.database import engine, Base
-from backend.app.api import api_router
-from backend.app.bot import send_review_notification, send_order_notification
-from backend.app.config import settings
-from backend.app.schemas import OrderCreate
+from app.database import engine, Base
+from app.api import api_router
+from app.bot import send_review_notification, send_order_notification
+from app.config import settings
+from app.schemas import OrderCreate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -59,9 +59,9 @@ async def order_webhook(order: OrderCreate):
     try:
         # Создаём заказ в БД
         from sqlalchemy import select
-        from backend.app.models import Trip, Order
-        from backend.app.database import get_db
-        from backend.app.bot import bot, init_bot
+        from app.models import Trip, Order
+        from app.database import get_db
+        from app.bot import bot, init_bot
 
         # Инициализируем бота если нужно
         if bot is None:
@@ -105,7 +105,7 @@ async def telegram_webhook(request: Request):
     Webhook для Telegram бота (Vercel serverless)
     Установите webhook: https://api.telegram.org/bot<token>/setWebhook?url=<your-vercel-url>/webhook/telegram
     """
-    from backend.app.bot import bot, dp, init_bot
+    from app.bot import bot, dp, init_bot
     from aiogram.types import Update
 
     try:
@@ -134,7 +134,7 @@ async def setup_webhook_endpoint():
     Endpoint для установки Telegram webhook
     Вызовите один раз после деплоя: POST /webhook/setup
     """
-    from backend.app.bot import bot, init_bot
+    from app.bot import bot, init_bot
 
     try:
         # Инициализируем бота
@@ -159,7 +159,7 @@ async def setup_webhook_endpoint():
 @app.get("/webhook/info")
 async def webhook_info():
     """Получить информацию о текущем webhook"""
-    from backend.app.bot import bot, init_bot
+    from app.bot import bot, init_bot
     
     try:
         await init_bot()

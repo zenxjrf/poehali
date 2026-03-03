@@ -2,9 +2,9 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Foreign
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from backend.app.database import Base
+from app.database import Base
 
-from backend.app.models.review import Review
+from app.models.review import Review
 
 __all__ = ['Driver', 'Trip', 'Order', 'Review', 'Base']
 
