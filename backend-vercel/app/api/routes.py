@@ -38,7 +38,7 @@ REVIEWS_DB = []
 
 
 # Drivers endpoints
-@router.get("/drivers", response_model=List[DriverResponse])
+@router.get("/drivers")
 async def get_drivers(db: AsyncSession = Depends(get_db)):
     try:
         # Временно используем фиктивные данные для serverless
@@ -48,7 +48,7 @@ async def get_drivers(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Ошибка сервера")
 
 
-@router.get("/drivers/{driver_id}", response_model=DriverResponse)
+@router.get("/drivers/{driver_id}")
 async def get_driver(driver_id: int, db: AsyncSession = Depends(get_db)):
     try:
         driver = next((d for d in DRIVERS_DB if d["id"] == driver_id), None)
