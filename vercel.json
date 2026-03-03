@@ -1,7 +1,7 @@
 {
   "buildCommand": "pip install --break-system-packages -r requirements.txt && cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "pip install --break-system-packages -r requirements.txt && cd frontend && npm install",
+  "installCommand": "pip install --break-system-packages -r requirements.txt",
   "framework": "vite",
   "functions": {
     "api/index.py": {
