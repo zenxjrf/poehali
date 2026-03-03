@@ -1,0 +1,6 @@
+requirements.txt
+backend/requirements.txt
+frontend/**/*
+api/**/*
+backend/app/**/*
+vercel.json
