@@ -1,10 +1,30 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm install",
-  "framework": "vite",
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "backend-vercel/requirements.txt",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend-vercel/api/index.py"
+    }
+  ],
   "env": {
-    "VITE_API_URL": "http://localhost:8000/api/v1",
-    "VITE_DISPATCHER_USERNAME": "abdurasulovb"
+    "PYTHON_VERSION": "3.11"
+  },
+  "functions": {
+    "backend-vercel/api/index.py": {
+      "runtime": "@vercel/python@3.0.0"
+    }
   }
 }

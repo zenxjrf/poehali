@@ -6,11 +6,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.database import engine, Base, async_session_maker
-from app.api import api_router
-from app.bot import send_review_notification, send_order_notification
-from app.config import settings
-from app.schemas import OrderCreate
+from .database import engine, Base, async_session_maker
+from .api import api_router
+from .bot import send_review_notification, send_order_notification
+from .config import settings
+from .schemas import OrderCreate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
