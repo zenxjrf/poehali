@@ -3,11 +3,37 @@ from typing import Optional
 from datetime import datetime
 
 from backend.app.schemas.review import ReviewBase, ReviewCreate, ReviewResponse
+from backend.app.schemas.payment import (
+    PaymentBase, PaymentCreate, PaymentUpdate, PaymentResponse,
+    PaymentProvider, PaymentStatus,
+    ClickCallback, ClickResponse,
+    PaymeCallback, PaymeParams, PaymeResponse
+)
+from backend.app.schemas.stats import (
+    OrderHistoryItem, OrderHistoryResponse,
+    DriverStats, OrderStats, DailyStats, DashboardStats,
+    ExportFormat, ExportRequest
+)
 
-__all__ = ['DriverBase', 'DriverCreate', 'DriverUpdate', 'DriverResponse',
-           'TripBase', 'TripCreate', 'TripResponse',
-           'OrderBase', 'OrderCreate', 'OrderUpdate', 'OrderResponse',
-           'ReviewBase', 'ReviewCreate', 'ReviewResponse']
+__all__ = [
+    # Driver
+    'DriverBase', 'DriverCreate', 'DriverUpdate', 'DriverResponse',
+    # Trip
+    'TripBase', 'TripCreate', 'TripResponse',
+    # Order
+    'OrderBase', 'OrderCreate', 'OrderUpdate', 'OrderResponse',
+    # Review
+    'ReviewBase', 'ReviewCreate', 'ReviewResponse',
+    # Payment
+    'PaymentBase', 'PaymentCreate', 'PaymentUpdate', 'PaymentResponse',
+    'PaymentProvider', 'PaymentStatus',
+    'ClickCallback', 'ClickResponse',
+    'PaymeCallback', 'PaymeParams', 'PaymeResponse',
+    # Stats
+    'OrderHistoryItem', 'OrderHistoryResponse',
+    'DriverStats', 'OrderStats', 'DailyStats', 'DashboardStats',
+    'ExportFormat', 'ExportRequest'
+]
 
 
 # Driver schemas
@@ -45,6 +71,8 @@ class DriverUpdate(BaseModel):
 
 class DriverResponse(DriverBase):
     id: int
+    rating: float = 5.0
+    total_trips: int = 0
     created_at: datetime
 
     class Config:
@@ -55,6 +83,7 @@ class DriverResponse(DriverBase):
 class TripBase(BaseModel):
     direction: str
     price: int
+    is_active: bool = True
 
 
 class TripCreate(TripBase):
@@ -92,8 +121,13 @@ class OrderResponse(OrderBase):
     id: int
     trip_id: int
     driver_id: Optional[int]
+    user_telegram_id: Optional[int]
     status: str
+    total_price: Optional[int]
+    payment_status: str
     created_at: datetime
+    updated_at: Optional[datetime]
+    completed_at: Optional[datetime]
 
     class Config:
         from_attributes = True

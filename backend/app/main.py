@@ -8,7 +8,8 @@ from contextlib import asynccontextmanager
 
 from backend.app.database import engine, Base, async_session_maker
 from backend.app.api import api_router
-from backend.app.bot import send_review_notification, send_order_notification
+from backend.app.bot.bot import send_review_notification, send_order_notification, init_bot, get_bot, dp
+from backend.app.bot.middleware import LoggingMiddleware, ThrottlingMiddleware
 from backend.app.config import settings
 from backend.app.schemas import OrderCreate
 
@@ -29,6 +30,11 @@ async def lifespan(app: FastAPI):
     # Vercel serverless: не запускаем polling, только webhook
     # Бот работает через webhook, который обрабатывается в /webhook/telegram
     logger.info("✅ Serverless режим: бот работает через webhook")
+    
+    # Регистрируем middleware для бота
+    dp.message.middleware(LoggingMiddleware())
+    dp.message.middleware(ThrottlingMiddleware(rate=0.5))
+    dp.callback_query.middleware(LoggingMiddleware())
 
     yield
 
@@ -60,11 +66,12 @@ async def order_webhook(order: OrderCreate):
         # Создаём заказ в БД
         from sqlalchemy import select
         from backend.app.models import Trip, Order
-        from backend.app.bot import bot, init_bot
+        from backend.app.bot.bot import init_bot, get_bot
 
         # Инициализируем бота если нужно
-        if bot is None:
-            await init_bot()
+        current_bot = get_bot()
+        if current_bot is None:
+            current_bot = await init_bot()
 
         # Работаем с БД через сессию
         async with async_session_maker() as db_session:
@@ -86,7 +93,7 @@ async def order_webhook(order: OrderCreate):
                 order_data['price'] = trip.price
                 order_data['direction'] = order_data.get('direction', 'tashkent_fergana')
 
-                asyncio.create_task(send_order_notification(bot, order_data, db_order.id))
+                asyncio.create_task(send_order_notification(current_bot, order_data, db_order.id))
 
                 return {"status": "success", "message": "Заявка принята", "order_id": db_order.id}
             except Exception:
@@ -104,12 +111,14 @@ async def telegram_webhook(request: Request):
     Webhook для Telegram бота (Vercel serverless)
     Установите webhook: https://api.telegram.org/bot<token>/setWebhook?url=<your-vercel-url>/webhook/telegram
     """
-    from backend.app.bot import bot, dp, init_bot
+    from backend.app.bot.bot import bot, dp, init_bot, get_bot
     from aiogram.types import Update
 
     try:
         # Инициализируем бота если нужно
-        await init_bot()
+        current_bot = get_bot()
+        if current_bot is None:
+            current_bot = await init_bot()
 
         # Получаем JSON из запроса
         body = await request.json()
@@ -119,8 +128,7 @@ async def telegram_webhook(request: Request):
         update = Update(**body)
 
         # Обрабатываем через диспетчер
-        # feed_webhook_update автоматически отправляет результат через bot.session
-        await dp.feed_webhook_update(bot=bot, update=update)
+        await dp.feed_webhook_update(bot=current_bot, update=update)
 
         return {"status": "ok"}
     except Exception as e:
@@ -134,22 +142,22 @@ async def setup_webhook_endpoint():
     Endpoint для установки Telegram webhook
     Вызовите один раз после деплоя: POST /webhook/setup
     """
-    from backend.app.bot import bot, init_bot
+    from backend.app.bot.bot import init_bot, get_bot
 
     try:
         # Инициализируем бота
-        await init_bot()
+        current_bot = await init_bot()
 
         # Получаем URL из переменных окружения
         webhook_base = os.getenv("VERCEL_URL") or os.getenv("WEBHOOK_URL")
-        
+
         if not webhook_base:
             return {"status": "error", "message": "VERCEL_URL или WEBHOOK_URL не найден"}
 
         telegram_webhook_url = f"https://{webhook_base}/webhook/telegram"
-        await bot.set_webhook(webhook_url=telegram_webhook_url)
+        await current_bot.set_webhook(webhook_url=telegram_webhook_url)
         logger.info(f"✅ Webhook установлен: {telegram_webhook_url}")
-        
+
         return {"status": "success", "webhook_url": telegram_webhook_url}
     except Exception as e:
         logger.error(f"❌ Ошибка установки webhook: {e}")
@@ -159,11 +167,11 @@ async def setup_webhook_endpoint():
 @app.get("/webhook/info")
 async def webhook_info():
     """Получить информацию о текущем webhook"""
-    from backend.app.bot import bot, init_bot
-    
+    from backend.app.bot.bot import init_bot, get_bot
+
     try:
-        await init_bot()
-        info = await bot.get_webhook_info()
+        current_bot = await init_bot()
+        info = await current_bot.get_webhook_info()
         return {"status": "success", "url": info.url, "pending_updates": info.pending_update_count}
     except Exception as e:
         logger.error(f"Ошибка получения webhook info: {e}")

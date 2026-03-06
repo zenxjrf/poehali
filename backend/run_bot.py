@@ -5,11 +5,12 @@
 """
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher, types
+import os
+
+from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.storage.memory import MemoryStorage
-import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,25 +19,21 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8606991774:AAGoHuOW3OCpN9n03U0gxKv5eDB27br60OQ')
 WEB_APP_URL = os.getenv('WEB_APP_URL', 'http://localhost:5173')
 DISPATCHER_USERNAME = os.getenv('DISPATCHER_USERNAME', 'abdurasulovb')
+DISPATCHER_PHONE = os.getenv('DISPATCHER_PHONE', '+998 94 136 54 74')
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
+# Кэшированная клавиатура
+_main_keyboard = None
 
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    try:
-        # Отправляем приветственное сообщение
-        await message.answer(
-            "👋 *Здравствуйте!*\n\n"
-            "Я бот сервиса *Поехали* 🚕\n"
-            "Помогу вам заказать такси из Ташкента в Фергану и обратно.\n\n"
-            "Нажмите кнопку ниже, чтобы открыть меню:",
-            parse_mode="Markdown"
-        )
-        
-        keyboard = InlineKeyboardMarkup(
+
+def get_main_keyboard() -> InlineKeyboardMarkup:
+    """Возвращает кэшированную главную клавиатуру"""
+    global _main_keyboard
+    if _main_keyboard is None:
+        _main_keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     InlineKeyboardButton(
@@ -56,26 +53,20 @@ async def cmd_start(message: types.Message):
                 ]
             ]
         )
-        
+    return _main_keyboard
+
+
+@dp.message(Command("start"))
+async def cmd_start(message):
+    try:
+        keyboard = get_main_keyboard()
         await message.answer(
-            "🚕 *Поехали — Ваше такси Ташкент ↔ Фергана*\n\n"
-            "📌 *Как заказать такси:*\n"
-            "1️⃣ Нажмите кнопку «🚕 Открыть меню»\n"
-            "2️⃣ Выберите направление поездки\n"
-            "3️⃣ Заполните форму заявки\n"
-            "4️⃣ Добавьте геолокацию (по желанию)\n"
-            "5️⃣ Дождитесь звонка от диспетчера\n\n"
-            "💰 *Стоимость:*\n"
-            "• Поездка: 200 000 сум с человека\n"
-            "• Посылки: от 60 000 сум\n\n"
-            "⏱ *Время в пути:* ~4 часа\n"
-            "🚗 *Комфорт:* Кондиционер, удобные сиденья\n\n"
-            "✨ *Почему выбирают нас:*\n"
-            "✓ Фиксированная цена\n"
-            "✓ Проверенные водители\n"
-            "✓ Подача в удобное время\n"
-            "✓ Безопасность и комфорт\n\n"
-            "Нажмите кнопку ниже, чтобы начать:",
+            "👋 *Здравствуйте!*\n\n"
+            "Я бот сервиса *Поехали* 🚕\n"
+            "Помогу вам заказать такси из Ташкента в Фергану и обратно.\n\n"
+            "💰 *Стоимость поездки:* 150 000 сум\n"
+            "📦 *Посылки:* от 60 000 сум\n\n"
+            "Нажмите кнопку ниже, чтобы открыть меню:",
             reply_markup=keyboard,
             parse_mode="Markdown"
         )
@@ -85,9 +76,9 @@ async def cmd_start(message: types.Message):
 
 
 @dp.callback_query(lambda c: c.data == "call_dispatcher")
-async def process_call(callback: types.CallbackQuery):
+async def process_call(callback):
     try:
-        await callback.answer("📞 +998 94 136 54 74", show_alert=True)
+        await callback.answer(f"📞 {DISPATCHER_PHONE}", show_alert=True)
     except Exception as e:
         logger.error(f"Ошибка в process_call: {e}")
 
@@ -97,7 +88,7 @@ async def main():
     logger.info("🤖 Запуск Telegram бота (polling режим)...")
     logger.info(f"WEB_APP_URL: {WEB_APP_URL}")
     logger.info(f"DISPATCHER_USERNAME: @{DISPATCHER_USERNAME}")
-    
+
     # Для локальной разработки используем polling
     await bot.delete_webhook()
     await dp.start_polling(bot)
