@@ -136,9 +136,14 @@ async def telegram_webhook(request: Request):
     from aiogram.types import Update
 
     try:
-        # Инициализируем бота если нужно
-        if bot is None:
-            await init_bot()
+        # Инициализируем бота - init_bot() обновляет глобальную переменную bot
+        await init_bot()
+        
+        # Импортируем бота ещё раз после инициализации
+        from app.bot import bot as current_bot
+        if current_bot is None:
+            logger.error("❌ Бот не инициализирован после init_bot()")
+            return {"status": "error", "message": "Bot not initialized"}
 
         # Получаем JSON из запроса
         body = await request.json()
@@ -149,7 +154,7 @@ async def telegram_webhook(request: Request):
 
         # Обрабатываем через диспетчер
         # feed_webhook_update автоматически отправляет результат через bot.session
-        await dp.feed_webhook_update(bot=bot, update=update)
+        await dp.feed_webhook_update(bot=current_bot, update=update)
 
         return {"status": "ok"}
     except Exception as e:
