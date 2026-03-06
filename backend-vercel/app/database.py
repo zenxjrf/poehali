@@ -4,6 +4,7 @@ from pathlib import Path
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
 
 from app.config import settings
 
@@ -34,8 +35,8 @@ try:
             db_url,
             echo=False,
             connect_args={"check_same_thread": False},
-            # Serverless: нет pool для SQLite
-            poolclass=None,
+            # Serverless: используем NullPool для отключения пула соединений
+            poolclass=NullPool,
         )
         logger.info("✅ SQLite engine created for serverless")
     elif "postgresql" in db_url:

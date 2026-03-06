@@ -108,6 +108,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("👋 Бот остановлен")
-    finally:
-        await bot.session.close()
-        logger.info("✅ Сессия закрыта")
