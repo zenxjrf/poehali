@@ -20,3 +20,6 @@ from backend.app.main import app
 
 # Экспортируем app для Vercel
 # Vercel автоматически распознаёт FastAPI приложения
+
+# ВАЖНО: В serverless режиме lifespan контекст не вызывается автоматически
+# Инициализация происходит при первом запросе через webhook

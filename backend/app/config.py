@@ -28,7 +28,7 @@ class Settings(BaseSettings):
         description="Database URL"
     )
     WEB_APP_URL: str = Field(
-        default="https://poehali-psi.vercel.app",
+        default="https://poehali.vercel.app",
         description="Web App URL for Telegram"
     )
 

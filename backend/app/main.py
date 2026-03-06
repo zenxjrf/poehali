@@ -109,21 +109,22 @@ async def telegram_webhook(request: Request):
 
     try:
         # Инициализируем бота если нужно
-        if bot is None:
-            await init_bot()
+        await init_bot()
 
         # Получаем JSON из запроса
         body = await request.json()
-        
+        logger.info(f"📨 Получен Telegram update: {body.get('update_id', 'unknown')}")
+
         # Преобразуем в Update
         update = Update(**body)
 
-        # Обрабатываем через диспетчер с правильным методом для webhook
+        # Обрабатываем через диспетчер
+        # feed_webhook_update автоматически отправляет результат через bot.session
         await dp.feed_webhook_update(bot=bot, update=update)
 
         return {"status": "ok"}
     except Exception as e:
-        logger.error(f"Ошибка обработки Telegram update: {e}", exc_info=True)
+        logger.error(f"❌ Ошибка обработки Telegram update: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
 
