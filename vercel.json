@@ -2,13 +2,13 @@
   "version": 2,
   "buildCommand": "uv pip install -r requirements.txt && cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
+      "source": "/api/(.*)",
       "dest": "/api/index.py"
     },
     {
-      "src": "/(.*)",
+      "source": "/(.*)",
       "dest": "/frontend/dist/$1"
     }
   ]
