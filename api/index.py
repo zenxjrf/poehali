@@ -5,11 +5,11 @@ Vercel Serverless Function Entry Point
 import sys
 from pathlib import Path
 
-# Добавляем backend-vercel/app в path для импортов
+# Добавляем backend-vercel в path для импортов
 root_path = Path(__file__).parent.parent
-backend_app_path = root_path / "backend-vercel" / "app"
-if str(backend_app_path) not in sys.path:
-    sys.path.insert(0, str(backend_app_path))
+backend_path = root_path / "backend-vercel"
+if str(backend_path) not in sys.path:
+    sys.path.insert(0, str(backend_path))
 
-# Импортируем FastAPI приложение
-from main import app
+# Импортируем FastAPI приложение используя абсолютные импорты
+from app.main import app
