@@ -15,11 +15,15 @@ if str(current_dir) not in sys.path:
     sys.path.insert(0, str(current_dir))
 
 logger.debug(f"Current dir: {current_dir}")
-logger.debug(f"Sys.path: {sys.path}")
+logger.debug(f"Files in current dir: {list(current_dir.iterdir())}")
+logger.debug(f"Files in app dir: {list((current_dir / 'app').iterdir()) if (current_dir / 'app').exists() else 'app dir not found'}")
 
 try:
     from app.main import app
     logger.info("✅ App imported successfully")
 except Exception as e:
-    logger.error(f"❌ Import error: {e}")
+    logger.error(f"❌ Import error: {e}", exc_info=True)
     raise
+
+# Явный экспорт для Vercel
+__all__ = ['app']
