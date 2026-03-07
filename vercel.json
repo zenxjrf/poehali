@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pip install -r requirements.txt && cd frontend && npm run build",
+  "buildCommand": "uv pip install -r requirements.txt && cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
