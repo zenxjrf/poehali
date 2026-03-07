@@ -3,15 +3,11 @@
   "installCommand": "cd frontend && npm install",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "functions": {
-    "backend-vercel/api/index.py": {
-      "runtime": "@vercel/python@3.0.0"
-    }
-  },
+  "apiDir": "backend-vercel/api",
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend-vercel/api/index.py"
+      "dest": "/api/index.py"
     },
     {
       "src": "/(.*)",
