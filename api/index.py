@@ -33,11 +33,6 @@ DRIVERS_DB = [
 ]
 
 
-@app.get("/")
-async def root():
-    return {"message": "Poehali API is running", "version": "1.0.0", "docs": "/docs"}
-
-
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": time.time()}
