@@ -5,21 +5,11 @@ Vercel Serverless Function Entry Point
 import sys
 from pathlib import Path
 
-# Добавляем корень проекта в path для импортов
+# Добавляем backend-vercel/app в path для импортов
 root_path = Path(__file__).parent.parent
-if str(root_path) not in sys.path:
-    sys.path.insert(0, str(root_path))
-
-# Добавляем backend-vercel в path
-backend_path = root_path / "backend-vercel"
-if str(backend_path) not in sys.path:
-    sys.path.insert(0, str(backend_path))
+backend_app_path = root_path / "backend-vercel" / "app"
+if str(backend_app_path) not in sys.path:
+    sys.path.insert(0, str(backend_app_path))
 
 # Импортируем FastAPI приложение
-from app.main import app
-
-# Экспортируем app для Vercel
-# Vercel автоматически распознаёт FastAPI приложения
-
-# ВАЖНО: В serverless режиме lifespan контекст не вызывается автоматически
-# Инициализация происходит при первом запросе через webhook
+from main import app
