@@ -17,7 +17,7 @@ from aiogram.types import (
     LabeledPrice
 )
 
-from app.config import settings
+from config import settings
 
 # =============================================================================
 # КОНФИГУРАЦИЯ И ЛОГИРОВАНИЕ

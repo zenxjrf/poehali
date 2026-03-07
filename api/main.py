@@ -6,11 +6,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.database import engine, Base, async_session_maker
-from app.api import api_router
-from app.bot import send_review_notification, send_order_notification
-from app.config import settings
-from app.schemas import OrderCreate
+from database import engine, Base, async_session_maker
+from api import api_router
+from bot import send_review_notification, send_order_notification
+from config import settings
+from schemas import OrderCreate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,8 +26,8 @@ async def lifespan(app: FastAPI):
         
         # Инициализация данных
         from sqlalchemy import select
-        from app.models import Trip, Driver
-        from app.database import async_session_maker
+        from models import Trip, Driver
+        from database import async_session_maker
         
         async with async_session_maker() as session:
             # Проверка направлений
@@ -87,8 +87,8 @@ async def order_webhook(order: OrderCreate):
     try:
         # Создаём заказ в БД
         from sqlalchemy import select
-        from app.models import Trip, Order
-        from app.bot import bot, init_bot
+        from models import Trip, Order
+        from bot import bot, init_bot
 
         # Инициализируем бота если нужно
         if bot is None:
@@ -132,7 +132,7 @@ async def telegram_webhook(request: Request):
     Webhook для Telegram бота (Vercel serverless)
     Установите webhook: https://api.telegram.org/bot<token>/setWebhook?url=<your-vercel-url>/webhook/telegram
     """
-    from app.bot import bot, dp, init_bot
+    from bot import bot, dp, init_bot
     from aiogram.types import Update
 
     try:
@@ -140,7 +140,7 @@ async def telegram_webhook(request: Request):
         await init_bot()
         
         # Импортируем бота ещё раз после инициализации
-        from app.bot import bot as current_bot
+        from bot import bot as current_bot
         if current_bot is None:
             logger.error("❌ Бот не инициализирован после init_bot()")
             return {"status": "error", "message": "Bot not initialized"}
@@ -168,7 +168,7 @@ async def setup_webhook_endpoint():
     Endpoint для установки Telegram webhook
     Вызовите один раз после деплоя: POST /webhook/setup
     """
-    from app.bot import bot, init_bot
+    from bot import bot, init_bot
 
     try:
         # Инициализируем бота
@@ -193,7 +193,7 @@ async def setup_webhook_endpoint():
 @app.get("/webhook/info")
 async def webhook_info():
     """Получить информацию о текущем webhook"""
-    from app.bot import bot, init_bot
+    from bot import bot, init_bot
     
     try:
         await init_bot()
