@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from database import engine, Base, async_session_maker
-from api import api_router
+from routes_dir import api_router
 from bot import send_review_notification, send_order_notification
 from config import settings
 from schemas import OrderCreate
