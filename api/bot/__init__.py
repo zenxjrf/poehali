@@ -1,4 +1,4 @@
-from bot.bot import (
+from .bot import (
     bot,
     dp,
     init_bot,
@@ -6,7 +6,7 @@ from bot.bot import (
     send_review_notification,
     send_order_notification
 )
-from config import settings
+from ..config import settings
 
 __all__ = [
     'bot',
