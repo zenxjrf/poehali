@@ -19,8 +19,10 @@ logger.debug(f"Files in current dir: {list(current_dir.iterdir())}")
 logger.debug(f"Files in app dir: {list((current_dir / 'app').iterdir()) if (current_dir / 'app').exists() else 'app dir not found'}")
 
 try:
-    from app.main import app
+    from app.main import app as _app
     logger.info("✅ App imported successfully")
+    # Явно присваиваем app для Vercel
+    app = _app
 except Exception as e:
     logger.error(f"❌ Import error: {e}", exc_info=True)
     raise
