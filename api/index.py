@@ -10,13 +10,13 @@ root_path = Path(__file__).parent.parent
 if str(root_path) not in sys.path:
     sys.path.insert(0, str(root_path))
 
-# Добавляем backend в path
-backend_path = root_path / "backend"
+# Добавляем backend-vercel в path
+backend_path = root_path / "backend-vercel"
 if str(backend_path) not in sys.path:
     sys.path.insert(0, str(backend_path))
 
 # Импортируем FastAPI приложение
-from backend.app.main import app
+from app.main import app
 
 # Экспортируем app для Vercel
 # Vercel автоматически распознаёт FastAPI приложения

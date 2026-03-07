@@ -6,18 +6,13 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "backend-vercel/api/index.py"
+      "destination": "/api/index.py"
     },
     {
       "source": "/(.*)",
       "destination": "frontend/dist/$1"
     }
   ],
-  "functions": {
-    "backend-vercel/api/index.py": {
-      "runtime": "@vercel/python@3.0.0"
-    }
-  },
   "env": {
     "PYTHON_VERSION": "3.11"
   }
